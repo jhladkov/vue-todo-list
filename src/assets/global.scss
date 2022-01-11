@@ -1,0 +1,81 @@
+*, *:after, *:before {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  height: 100%;
+}
+
+html {
+  min-height: 100%;
+}
+
+//::-webkit-scrollbar{
+//  width: 5px;
+//}
+//::-webkit-scrollbar-track {
+//  background: $white;
+//}
+//::-webkit-scrollbar-thumb{
+//  background: $lightGray;
+//  border-radius: 8px;
+//}
+//::-webkit-scrollbar-thumb:hover{
+//  background: $darkGray;
+//}
+
+#root {
+  height: 100%;
+}
+
+.container {
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+li, ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+main {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.main-wrapper {
+  flex: 1 0 auto;
+}
+
+img {
+  width: 100%;
+  height: 100%;
+}
+
+a {
+  text-decoration: none;
+}
+
+p {
+  margin: 0;
+}
+
+svg {
+
+}
+
+.button{
+  padding: 10px;
+  border: 1px solid chartreuse;
+  cursor: pointer;
+}

@@ -1,0 +1,13 @@
+.header{
+  background: #73d7aa;
+  padding: 10px 0;
+  .header__logo{
+    user-select: none;
+    pointer-events: none;
+    max-width: 35px;
+  }
+  .header__inner{
+    display: flex;
+    justify-content: space-between;
+  }
+}
