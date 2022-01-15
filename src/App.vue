@@ -3,10 +3,10 @@
     <Header/>
     <div class="main-wrapper">
       <Container>
-<!--        <Sidebar/>-->
         <router-view/>
       </Container>
     </div>
+    <Modal v-if="this.$store.state.modal.open" title="Добавить задачу"/>
   </main>
 </template>
 
@@ -17,8 +17,9 @@
 import Header from "./components/Header/Header";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Container from "./hooc/Container";
+import Modal from "./UI/Modal";
 
 export default {
-  components: {Container, Header}
+  components: {Modal, Container, Header}
 }
 </script>

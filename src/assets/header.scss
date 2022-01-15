@@ -1,13 +1,21 @@
 .header{
   background: #73d7aa;
   padding: 10px 0;
+  margin-bottom: 50px;
   .header__logo{
     user-select: none;
     pointer-events: none;
     max-width: 35px;
   }
-  .header__inner{
+  .header__wrapper{
     display: flex;
     justify-content: space-between;
+  }
+  .header__inner{
+    display: flex;
+    align-items: center;
+  }
+  .header__button{
+    margin-right: 20px;
   }
 }

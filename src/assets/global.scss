@@ -5,8 +5,9 @@
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-  height: 100%;
+  height: 100vh;
 }
+
 
 html {
   min-height: 100%;
@@ -26,12 +27,12 @@ html {
 //  background: $darkGray;
 //}
 
-#root {
+#app {
   height: 100%;
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 800px;
   width: 100%;
   margin: 0 auto;
   padding: 0 15px;
@@ -75,7 +76,47 @@ svg {
 }
 
 .button{
+  background: none;
   padding: 10px;
-  border: 1px solid chartreuse;
   cursor: pointer;
+  transition: all .3s;
+  outline: none;
+  border: 1px solid darkgray;
+  font-size: 12px;
+  &:hover{
+    background: #73d7aa;
+    color: white;
+    border-color: #73d7aa;
+    border-radius: 50px;
+  }
+}
+
+.input{
+  padding: 10px;
+  border: 1px solid darkgray;
+  transition: all .3s;
+  outline: none;
+  &:focus{
+    border-color: #73d7aa;
+    border-radius: 50px;
+  }
+}
+
+.background{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  background: rgba(0,0,0, .5);
+  animation: 1s appearance;
+}
+.error-message{
+  color: red;
+  border-color: red;
+  &:focus{
+    color: black;
+    border-color: red;
+  }
 }

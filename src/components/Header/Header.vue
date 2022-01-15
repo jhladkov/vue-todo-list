@@ -1,12 +1,14 @@
 <template>
   <header class="header">
     <Container>
-      <div class="header__inner">
+      <div class="header__wrapper">
         <div class="header__logo">
           <img src="@/assets/logo.png" alt="">
         </div>
-        <div class="header__add-task">
-          <Button text="Добавить задачу" item-class="header__button button"/>
+        <div class="header__inner">
+          <div class="header__info-about-account account">
+            инфа об аккаунте ...
+          </div>
         </div>
       </div>
     </Container>
