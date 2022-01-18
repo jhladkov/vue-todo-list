@@ -2,7 +2,7 @@
   <Section section-class="section modal">
     <div class="modal__wrapper">
       <div class="modal__header">
-        <h3 class="modal__title">{{ title }}</h3>
+        <Title title-class="modal__title" :title="title" />
         <div @click="closeModel" class="modal__close">&times;</div>
       </div>
       <div class="modal__inner">
@@ -33,19 +33,16 @@
 </template>
 
 <script>
-import { getDatabase, ref, set} from "firebase/database";
+import {getDatabase, ref, set} from "firebase/database";
 import {useStore} from "vuex";
-import Section from "../hooc/Section";
-import Form from "../components/Form/Form";
-import Input from "./Input";
-import Button from "./Button";
+import Form from "./Form/Form";
 import {reactive} from "vue";
 import useVuelidate from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
+import {required} from '@vuelidate/validators'
 import {useObjectTodo} from "../hooks/useObjectTodo";
 
 export default {
-  components: {Button, Input, Form, Section},
+  components: {Form},
   props: {
     title: {
       type: String,
@@ -62,7 +59,7 @@ export default {
     const rules = {
       inputText: {required}
     }
-    const v$ = useVuelidate(rules,state)
+    const v$ = useVuelidate(rules, state)
 
     const closeModel = () => {
       store.dispatch('changeStatusOpen')
@@ -77,18 +74,19 @@ export default {
 
     const createTodo = () => {
       if (!v$.value.$error) {
-        const obj = useObjectTodo('',state.inputText, '')
-        store.dispatch('changeTodosArr',[...store.state.modal.todos,obj])
-        writeData(obj)
+        const obj = useObjectTodo('', state.inputText, '')
+
+        writeData([...store.state.modal.todos, obj])
+        store.dispatch('changeTodosArr', [...store.state.modal.todos, obj])
         closeModel()
         state.inputText = ''
         console.log('ok')
-      }else {
+      } else {
         console.log('error', v$.value.$error)
       }
     }
     return {
-      closeModel,state,v$,createTodo
+      closeModel, state, v$, createTodo
     }
   }
 }

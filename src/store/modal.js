@@ -16,7 +16,6 @@ export const modal = {
             commit('setOpen', !state.open)
         },
         changeTodosArr({state,commit},payload) {
-            console.log(payload)
             commit('setTodos', payload)
         }
     }

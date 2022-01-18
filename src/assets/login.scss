@@ -1,0 +1,38 @@
+.login {
+  border: 1px solid darkgray;
+  padding: 20px;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  .login__title {
+    margin-bottom: 20px;
+  }
+
+  .login__inner {
+    .login__item {
+      padding: 10px;
+      border: 1px solid darkgray;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      transition: all .3s;
+      margin-bottom: 20px;
+      &:last-child{
+        margin-bottom: 0;
+      }
+      &:hover{
+        border-radius: 50px;
+        color: #73d7aa;
+        border-color: #73d7aa;
+        .item__svg{
+          fill: #73d7aa;
+        }
+      }
+      .item__svg{
+        margin-right: 20px;
+      }
+    }
+  }
+}

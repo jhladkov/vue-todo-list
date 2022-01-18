@@ -6,6 +6,7 @@
 
 <script>
 export default {
+  name: 'Section',
   props:{
     sectionClass: {
       type: String,

@@ -15,11 +15,12 @@
 </style>
 <script>
 import Header from "./components/Header/Header";
-import Sidebar from "./components/Sidebar/Sidebar";
-import Container from "./hooc/Container";
-import Modal from "./UI/Modal";
+import Modal from "./components/Modal";
 
 export default {
-  components: {Modal, Container, Header}
+  components: {Modal, Header},
+  setup() {
+
+  }
 }
 </script>
