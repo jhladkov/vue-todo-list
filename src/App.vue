@@ -16,11 +16,17 @@
 <script>
 import Header from "./components/Header/Header";
 import Modal from "./components/Modal";
+import {useStore} from "vuex";
+
 
 export default {
   components: {Modal, Header},
   setup() {
-
+    const store = useStore()
+    if (localStorage.getItem('userData')) {
+      const data = JSON.parse(localStorage.getItem('userData'))
+      store.dispatch('changeAuthStatus', data)
+    }
   }
 }
 </script>

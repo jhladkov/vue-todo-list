@@ -125,3 +125,12 @@ svg {
   max-width: 32px;
   transition: all .3s;
 }
+
+.exit{
+  border-color: white;
+  transition: all .3s;
+  &:hover{
+    border-color: red;
+    background: red;
+  }
+}

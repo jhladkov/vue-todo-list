@@ -66,10 +66,16 @@ export default {
     }
 
     function writeData(value) {
-      const db = getDatabase();
-      set(ref(db, 'user/'), {
-        data: value
-      });
+      if (JSON.parse(localStorage.getItem('userData')).user.uid) {
+        const db = getDatabase();
+        set(ref(db, `${JSON.parse(localStorage.getItem('userData')).user.uid}/`), {
+          data: value
+        });
+      }else {
+        console.log('storage value = null')
+      }
+
+
     }
 
     const createTodo = () => {

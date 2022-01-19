@@ -17,8 +17,7 @@ import Button from "../UI/Button";
 import {useStore} from 'vuex'
 import Section from "../hooc/Section";
 import Panel from "../components/Panel/Panel";
-import {onMounted} from "vue";
-import {getDatabase, ref, onValue} from "firebase/database";
+import {getDatabase, ref, get, child} from "firebase/database";
 
 export default {
   components: {Panel, Section, Button},
@@ -28,19 +27,20 @@ export default {
     const openModel = () => {
       store.dispatch('changeStatusOpen')
     }
-    onMounted(() => {
-      try {
-        const db = getDatabase();
-        const starCountRef = ref(db, '/');
-        onValue(starCountRef, (snapshot) => {
-          const data = snapshot.val();
-          console.log(data)
-        });
-      } catch (err) {
-        console.log(err)
-      }
-    })
 
+    const dbRef = ref(getDatabase());
+
+    get(child(dbRef, `${JSON.parse(localStorage.getItem('userData')).user.uid}/`)).then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val().data
+        console.log('data', data)
+        store.dispatch('changeTodosArr', data)
+      } else {
+        console.log("No data available");
+      }
+    }).catch((error) => {
+      console.error(error);
+    });
     return {
       openModel,
     }

@@ -2,6 +2,24 @@
   background: #73d7aa;
   padding: 10px 0;
   margin-bottom: 50px;
+  .account{
+    display: flex;
+    align-items: center;
+    .account__img{
+      max-width: 30px;
+      margin-right: 10px;
+    }
+    .account__inner{
+      display: flex;
+     align-items: center;
+      .account__exit{
+        margin-left: 20px;
+      }
+    }
+  }
+
+
+
   .header__logo{
     user-select: none;
     pointer-events: none;

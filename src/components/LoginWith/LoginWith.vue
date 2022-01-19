@@ -11,6 +11,7 @@
 <script>
 import {getAuth, signInWithPopup, GoogleAuthProvider} from "firebase/auth";
 import {useStore} from "vuex";
+import { useRouter} from 'vue-router'
 
 export default {
   props: {
@@ -33,20 +34,25 @@ export default {
     const auth = getAuth();
     const provider = new GoogleAuthProvider();
     const store = useStore()
+    const router = useRouter()
 
     const login = () => {
       signInWithPopup(auth, provider)
           .then((result) => {
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            const token = credential.accessToken;
-            const user = result.user;
+            if (result) {
+              const credential = GoogleAuthProvider.credentialFromResult(result);
+              const token = credential.accessToken;
+              const user = result.user;
 
-            const obj = {token, user}
+              const obj = {token, user}
 
-            store.dispatch('changeAuthStatus', obj)
+              localStorage.setItem('userData', JSON.stringify(obj))
+              store.dispatch('changeAuthStatus', obj)
 
-            // console.log('token',token)
-            // console.log('user',user)
+              router.push('/')
+
+            }
+
           }).catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;

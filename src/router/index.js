@@ -26,10 +26,11 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
 
-    if (!store.state.isAuth && !localStorage.getItem('token')) {
+    if (!store.state.isAuth && !localStorage.getItem('userData') && to.name !== 'Login') {
       console.log('not Auth')
       next('/login')
     }else {
+      console.log('auth')
       next()
     }
 })
