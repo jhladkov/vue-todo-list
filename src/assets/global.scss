@@ -126,11 +126,25 @@ svg {
   transition: all .3s;
 }
 
-.exit{
-  border-color: white;
+.exit,.remove{
+  border-color: darkgray;
   transition: all .3s;
   &:hover{
     border-color: red;
     background: red;
   }
+}
+
+.list-item {
+  display: inline-block;
+  margin-right: 10px;
+}
+.list-enter-active,
+.list-leave-active {
+  transition: all 1s ease;
+}
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
 }

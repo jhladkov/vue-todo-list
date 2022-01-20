@@ -10,6 +10,7 @@
     </div>
   </Section>
   <Panel title="Дела" title-class="panel-todo__title title"/>
+<!--  <img src="gs://todo-list-app-433b9.appspot.com/это.jpg" alt="">-->
 </template>
 
 <script>
@@ -33,7 +34,6 @@ export default {
     get(child(dbRef, `${JSON.parse(localStorage.getItem('userData')).user.uid}/`)).then((snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val().data
-        console.log('data', data)
         store.dispatch('changeTodosArr', data)
       } else {
         console.log("No data available");

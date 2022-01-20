@@ -1,9 +1,11 @@
-export const useObjectTodo = (section = '', inputValue, imgUrl = '') => {
+export const useObjectTodo = (section = '',type= 'todo', inputValue, imgUrl = '' ,id= 0) => {
 
     return {
         section,
+        type,
         value:inputValue,
-        imgUrl
+        imgUrl,
+        id
     }
 }
 

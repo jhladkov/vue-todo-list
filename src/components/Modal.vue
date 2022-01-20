@@ -2,16 +2,10 @@
   <Section section-class="section modal">
     <div class="modal__wrapper">
       <div class="modal__header">
-        <Title title-class="modal__title" :title="title" />
+        <Title title-class="modal__title" :title="title"/>
         <div @click="closeModel" class="modal__close">&times;</div>
       </div>
-      <div class="modal__inner">
-        <div class="modal__drag drag-area">
-          <div class="drag-area-info">
-            <p class="drag-area-info__text">Вставьте изображение</p>
-          </div>
-        </div>
-      </div>
+     <DragAndDrop @getFile="getImg"/>
       <Form @submit.prevent="createTodo" form-class="modal__form form">
         <p class="form__error error-message" v-if="v$.$error">Это поле обязательное</p>
         <Input
@@ -33,16 +27,17 @@
 </template>
 
 <script>
-import {getDatabase, ref, set} from "firebase/database";
 import {useStore} from "vuex";
 import Form from "./Form/Form";
 import {reactive} from "vue";
 import useVuelidate from '@vuelidate/core'
 import {required} from '@vuelidate/validators'
 import {useObjectTodo} from "../hooks/useObjectTodo";
+import {useWriteData} from "../hooks/useWriteData";
+import DragAndDrop from "./DragAndDrop/DragAndDrop";
 
 export default {
-  components: {Form},
+  components: {DragAndDrop, Form},
   props: {
     title: {
       type: String,
@@ -54,6 +49,7 @@ export default {
 
     const state = reactive({
       inputText: '',
+      imgUrl: '',
       errorStatus: false
     })
     const rules = {
@@ -65,24 +61,16 @@ export default {
       store.dispatch('changeStatusOpen')
     }
 
-    function writeData(value) {
-      if (JSON.parse(localStorage.getItem('userData')).user.uid) {
-        const db = getDatabase();
-        set(ref(db, `${JSON.parse(localStorage.getItem('userData')).user.uid}/`), {
-          data: value
-        });
-      }else {
-        console.log('storage value = null')
-      }
-
-
+    const getImg = (payload) => {
+      state.imgUrl = payload
     }
 
     const createTodo = () => {
       if (!v$.value.$error) {
-        const obj = useObjectTodo('', state.inputText, '')
+        const obj = useObjectTodo('','todo', state.inputText, '', Math.floor(Math.random() * 1000000))
 
-        writeData([...store.state.modal.todos, obj])
+        useWriteData([...store.state.modal.todos, obj])
+
         store.dispatch('changeTodosArr', [...store.state.modal.todos, obj])
         closeModel()
         state.inputText = ''
@@ -92,7 +80,7 @@ export default {
       }
     }
     return {
-      closeModel, state, v$, createTodo
+      closeModel, state, v$, createTodo,getImg
     }
   }
 }
