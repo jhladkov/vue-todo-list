@@ -1,11 +1,18 @@
 <template>
-  <input
+  <input v-if="inputType !== 'file'"
       :type="inputType"
       :class="inputClass"
       :placeholder="placeholder"
       :value="modelValue"
       @input="emitChange"
   >
+  <div v-else class="input-wrapper">
+    <label>
+      <input @input="emitChange" type="file" id="file" :placeholder="placeholder" :class="inputClass">
+        {{placeholder}}
+    </label>
+  </div>
+
 </template>
 
 <script>
@@ -31,7 +38,12 @@ export default {
   },
   setup(props,{emit}) {
     const emitChange = (event) => {
-      emit('update:modelValue', event.target.value)
+      if (props.inputType === 'file') {
+
+        emit('getFile',event.target.files['0'],true)
+      }else {
+        emit('update:modelValue', event.target.value)
+      }
     }
 
     return {

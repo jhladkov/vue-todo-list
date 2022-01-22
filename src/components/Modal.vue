@@ -5,7 +5,7 @@
         <Title title-class="modal__title" :title="title"/>
         <div @click="closeModel" class="modal__close">&times;</div>
       </div>
-     <DragAndDrop @getFile="getImg"/>
+     <DragAndDrop @getUrlImg="getImg"/>
       <Form @submit.prevent="createTodo" form-class="modal__form form">
         <p class="form__error error-message" v-if="v$.$error">Это поле обязательное</p>
         <Input
@@ -67,14 +67,14 @@ export default {
 
     const createTodo = () => {
       if (!v$.value.$error) {
-        const obj = useObjectTodo('','todo', state.inputText, '', Math.floor(Math.random() * 1000000))
+        const obj = useObjectTodo('','todo', state.inputText, state.imgUrl, Math.floor(Math.random() * 1000000))
 
         useWriteData([...store.state.modal.todos, obj])
 
         store.dispatch('changeTodosArr', [...store.state.modal.todos, obj])
         closeModel()
         state.inputText = ''
-        console.log('ok')
+        state.imgUrl = ''
       } else {
         console.log('error', v$.value.$error)
       }
