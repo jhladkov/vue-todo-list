@@ -4,6 +4,8 @@ import Section from "../hooc/Section";
 import Container from '../hooc/Container'
 import Title from "./Title";
 import Svg from "./Svg";
+import Background from "./Background";
+import Loader from "./Loader";
 
 export default [
     Button,
@@ -11,5 +13,7 @@ export default [
     Section,
     Container,
     Title,
-    Svg
+    Svg,
+    Background,
+    Loader,
 ]

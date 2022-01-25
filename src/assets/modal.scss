@@ -8,7 +8,7 @@
   height: 100%;
   max-height: 400px;
   padding: 10px;
-  position: absolute;
+  position: fixed;
   transform: translate(-50%, -50%);
   top: 50%;
   left: 50%;
@@ -72,6 +72,7 @@
   .drag-area {
     border-color: #73d7aa !important;
     background: #d2fcdb;
+
   }
 }
 
@@ -106,14 +107,19 @@
 
   .input-wrapper {
 
+    button{
+      border-color: white;
+    }
+
     label {
       cursor: pointer;
-      border: 1px solid darkgray;
+      border: 1px solid white;
       transition: all .3s;
       line-height: 2;
       padding: 10px;
       font-size: 12px;
       cursor: pointer;
+      margin-right: 20px;
       &:hover {
         border-radius: 50px;
         border-color: #73d7aa;

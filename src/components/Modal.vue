@@ -5,7 +5,7 @@
         <Title title-class="modal__title" :title="title"/>
         <div @click="closeModel" class="modal__close">&times;</div>
       </div>
-     <DragAndDrop @getUrlImg="getImg"/>
+      <DragAndDrop @getUrlImg="getImg" @activeUpload="activeUpload" @removeElementRef="setElementRef"/>
       <Form @submit.prevent="createTodo" form-class="modal__form form">
         <p class="form__error error-message" v-if="v$.$error">Это поле обязательное</p>
         <Input
@@ -23,7 +23,7 @@
       </Form>
     </div>
   </Section>
-  <div @click="closeModel" class="background"></div>
+  <Background @click="closeModel"/>
 </template>
 
 <script>
@@ -35,9 +35,11 @@ import {required} from '@vuelidate/validators'
 import {useObjectTodo} from "../hooks/useObjectTodo";
 import {useWriteData} from "../hooks/useWriteData";
 import DragAndDrop from "./DragAndDrop/DragAndDrop";
+import {useRemoveData} from "../hooks/useRemoveData";
+
 
 export default {
-  components: {DragAndDrop, Form},
+  components: { DragAndDrop, Form},
   props: {
     title: {
       type: String,
@@ -50,29 +52,46 @@ export default {
     const state = reactive({
       inputText: '',
       imgUrl: '',
-      errorStatus: false
+      errorStatus: false,
+      activeUpload: false,
+      elementRef: ''
     })
     const rules = {
       inputText: {required}
     }
     const v$ = useVuelidate(rules, state)
 
-    const closeModel = () => {
-      store.dispatch('changeStatusOpen')
+    const closeModel = (deleteData = true) => {
+      if (!state.activeUpload) {
+        store.dispatch('changeStatusOpen')
+        if (state.elementRef && deleteData) {
+          useRemoveData(state.elementRef)
+        }
+      }
     }
 
     const getImg = (payload) => {
       state.imgUrl = payload
     }
 
+    const activeUpload = (value) => {
+      state.activeUpload = value
+    }
+
+    const setElementRef = (value) => {
+      if (value) {
+        state.elementRef = value
+      }
+    }
+
     const createTodo = () => {
-      if (!v$.value.$error) {
-        const obj = useObjectTodo('','todo', state.inputText, state.imgUrl, Math.floor(Math.random() * 1000000))
+      if (!v$.value.$error && !state.activeUpload) {
+        const obj = useObjectTodo('', 'todo', state.inputText, state.imgUrl,'', Math.floor(Math.random() * 1000000))
 
         useWriteData([...store.state.modal.todos, obj])
 
         store.dispatch('changeTodosArr', [...store.state.modal.todos, obj])
-        closeModel()
+        closeModel(false)
         state.inputText = ''
         state.imgUrl = ''
       } else {
@@ -80,7 +99,7 @@ export default {
       }
     }
     return {
-      closeModel, state, v$, createTodo,getImg
+      closeModel, state, v$, createTodo, getImg, activeUpload,setElementRef
     }
   }
 }

@@ -4,7 +4,8 @@ import {modal} from "./modal";
 export default createStore({
     state: {
         isAuth: false,
-        userInfo: {}
+        userInfo: {},
+        isLoaded: false
     },
     mutations: {
         setUserInfo(state, payload) {
@@ -22,6 +23,9 @@ export default createStore({
             if (payload) {
                 state.modal.todos = payload
             }
+        },
+        setLoading(state,payload) {
+            state.isLoaded = payload
         }
     },
     actions: {
@@ -33,6 +37,9 @@ export default createStore({
         },
         changeTodo({commit}, payload) {
             commit('setTodo',payload)
+        },
+        changeLoadingStatus({commit},payload) {
+            commit('setLoading',payload)
         }
     },
     modules: {

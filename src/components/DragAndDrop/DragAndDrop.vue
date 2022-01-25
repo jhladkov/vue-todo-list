@@ -7,12 +7,17 @@
        @drop.prevent="dropData"
   >
     <div class="modal__drag drag-area">
-      <div class="drag-area-info">
-        <p v-if="!state.drag" class="drag-area-info__text">Вставьте изображение</p>
-        <p v-else class="drag-area-info__text">Отпустите изображение</p>
+      <div class="drag-area__loader --black" v-if="state.loadingStatus">
+        <Loader/>
+      </div>
+      <div v-else class="drag-area-info">
+        <p v-if="!state.drag" class="drag-area-info__text">Вставьте файл</p>
+        <p v-else class="drag-area-info__text">Отпустите файл</p>
       </div>
     </div>
   </div>
+
+
   <div v-else class="modal__inner img-wrapper">
     <div class="img-wrapper__img">
       <img :src="state.imgInfo.url" alt="">
@@ -28,11 +33,10 @@
 
 <script>
 import {reactive} from "vue";
-import {getStorage, ref, uploadBytes, getDownloadURL, deleteObject} from "firebase/storage";
-import Input from "../../UI/Input";
+import {getStorage, ref, uploadBytes, getDownloadURL} from "firebase/storage";
+import {useRemoveData} from "../../hooks/useRemoveData";
 
 export default {
-  components: {Input},
   setup(props, {emit}) {
     const storage = getStorage();
 
@@ -40,6 +44,17 @@ export default {
       drag: false,
       sendDataInfo: {},
       uploadStatus: false,
+      activeUpload: false,
+      loadingStatus: false,
+      validType: [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'image/png',
+        'text/plain',
+        'image/jpeg',
+        'video/mp4',
+        'video/x-matroska',
+        'audio/mpeg'
+      ],
       imgInfo: {
         url: '',
         elementRef: ''
@@ -47,49 +62,67 @@ export default {
     })
 
     const sendDataToStorage = (value) => {
-      const elementRef = ref(storage, state.sendDataInfo.name);
+      const elementRef = ref(storage, `${JSON.parse(localStorage.getItem('userData')).user.uid}/${state.sendDataInfo.name}`);
       const file = value;
 
-      uploadBytes(elementRef, file).then((snapshot) => {
-        getDownloadURL(ref(storage, elementRef))
-            .then((url) => {
-              if (url) {
-                state.imgInfo.elementRef = elementRef
-                state.imgInfo.url = url
-                state.uploadStatus = true
-                emit('getUrlImg', url)
-              }
-              console.log(url)
-            })
-            .catch((error) => {
-              console.log(error)
-            });
-      });
+      if (Object.values(state.validType).includes(file.type)) {
+        emit('removeElementRef', elementRef)
+
+        console.log(`${JSON.parse(localStorage.getItem('userData')).user.uid}/${state.sendDataInfo.name}`)
+
+        uploadBytes(elementRef, file).then(() => {
+          getDownloadURL(ref(storage, elementRef))
+              .then((url) => {
+                if (url) {
+                  state.loadingStatus = false
+                  state.imgInfo.elementRef = elementRef
+                  state.imgInfo.url = url
+                  state.activeUpload = false
+                  state.uploadStatus = true
+                  emit('activeUpload', state.activeUpload)
+                  emit('getUrlImg', url)
+                }
+                console.log(url)
+              })
+              .catch((error) => {
+                console.log(error)
+              });
+        });
+      } else {
+        state.activeUpload = false
+        state.uploadStatus = false
+        state.loadingStatus = false
+        console.log('errorType', file.type)
+      }
+
     }
     const deleteImg = () => {
       if (state.imgInfo.elementRef) {
-        deleteObject(state.imgInfo.elementRef).then(() => {
-          state.sendDataInfo.name = ''
-          state.uploadStatus = false
-          state.imgInfo.url = ''
-          state.imgInfo.elementRef = ''
-        }).catch((error) => {
-          // Uh-oh, an error occurred!
-        });
+        useRemoveData(state.imgInfo.elementRef)
+        state.sendDataInfo.name = ''
+        state.uploadStatus = false
+        state.imgInfo.url = ''
+        state.imgInfo.elementRef = ''
       }
     }
 
-    const dropData = (event,wasActiveInput) => {
+    const dropData = (event, wasActiveInput) => {
+      state.activeUpload = true
+      state.loadingStatus = true
+      emit('activeUpload', true)
       let file;
       if (wasActiveInput) {
+        deleteImg()
         file = event
-      }else {
+      } else {
         console.log('drop')
         file = event.dataTransfer.files[0]
       }
       state.sendDataInfo.name = file.name
+      console.log(file)
       sendDataToStorage(file)
       state.drag = false
+
     }
 
     return {

@@ -12,6 +12,7 @@
 import {getAuth, signInWithPopup, GoogleAuthProvider} from "firebase/auth";
 import {useStore} from "vuex";
 import { useRouter} from 'vue-router'
+import {onMounted} from "vue";
 
 export default {
   props: {
@@ -65,6 +66,8 @@ export default {
         console.log('credential', credential)
       });
     }
+
+    onMounted(() => store.dispatch('changeLoadingStatus',true))
 
     return {
       login

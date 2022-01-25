@@ -9,13 +9,14 @@
       </div>
     </div>
   </Section>
-  <Panel title="Дела" title-class="panel-todo__title title"/>
-<!--  <img src="gs://todo-list-app-433b9.appspot.com/это.jpg" alt="">-->
+  <Panel title="Дела" title-class="panel-todo__title title" typePanel="todo"/>
+  <Panel title="Выполненные" title-class="panel-done__title title" typePanel="done"/>
 </template>
 
 <script>
 import Button from "../UI/Button";
 import {useStore} from 'vuex'
+import {onMounted} from "vue";
 import Section from "../hooc/Section";
 import Panel from "../components/Panel/Panel";
 import {getDatabase, ref, get, child} from "firebase/database";
@@ -31,16 +32,28 @@ export default {
 
     const dbRef = ref(getDatabase());
 
-    get(child(dbRef, `${JSON.parse(localStorage.getItem('userData')).user.uid}/`)).then((snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val().data
-        store.dispatch('changeTodosArr', data)
-      } else {
-        console.log("No data available");
-      }
-    }).catch((error) => {
-      console.error(error);
-    });
+    const getDataTodo = () => {
+      get(child(dbRef, `${JSON.parse(localStorage.getItem('userData')).user.uid}/`)).then((snapshot) => {
+        store.dispatch('changeLoadingStatus',true)
+
+        if (snapshot.exists()) {
+          const data = snapshot.val().data
+          if (data) {
+            store.dispatch('changeTodosArr', data)
+          }
+        } else {
+          console.log("No data available");
+        }
+      }).catch((error) => {
+        console.error(error);
+        getDataTodo()
+
+      });
+    }
+
+    onMounted(() => getDataTodo())
+
+
     return {
       openModel,
     }
