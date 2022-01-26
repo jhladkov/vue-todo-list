@@ -51,7 +51,10 @@ export default {
 
     const state = reactive({
       inputText: '',
-      imgUrl: '',
+      storageData: {
+        url: '',
+        type: ''
+      },
       errorStatus: false,
       activeUpload: false,
       elementRef: ''
@@ -71,10 +74,11 @@ export default {
     }
 
     const getImg = (payload) => {
-      state.imgUrl = payload
+      state.storageData.url = payload
     }
 
-    const activeUpload = (value) => {
+    const activeUpload = (value,typeData) => {
+      state.storageData.type = typeData
       state.activeUpload = value
     }
 
@@ -86,14 +90,14 @@ export default {
 
     const createTodo = () => {
       if (!v$.value.$error && !state.activeUpload) {
-        const obj = useObjectTodo('', 'todo', state.inputText, state.imgUrl,'', Math.floor(Math.random() * 1000000))
+        const obj = useObjectTodo('', 'todo', state.inputText, state.storageData.url,state.storageData.type, Math.floor(Math.random() * 1000000))
 
         useWriteData([...store.state.modal.todos, obj])
 
         store.dispatch('changeTodosArr', [...store.state.modal.todos, obj])
         closeModel(false)
         state.inputText = ''
-        state.imgUrl = ''
+        state.storageData.url = ''
       } else {
         console.log('error', v$.value.$error)
       }

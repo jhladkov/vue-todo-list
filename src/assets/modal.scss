@@ -159,6 +159,11 @@
       }
     }
   }
-
-
+}
+.video-wrapper,.audio-wrapper{
+  video,audio{
+    height: 200px;
+    width: 100%;
+    max-width: 375px;
+  }
 }

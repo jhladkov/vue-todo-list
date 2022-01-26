@@ -3,10 +3,10 @@
     <Title :title="title" :title-class="titleClass"/>
     <div class="panel__inner">
       <transition-group name="list">
-        <TodoItem v-if="typePanel === 'todo'" @done="done" @remove="remove" v-for="item in state.todo" :id="item.id" :value="item.value" :key="item.id"
-                  :img-url="item.storageInfo.url"/>
-        <TodoItem v-else @done="done" v-for="item in state.done" :id="item.id" :value="item.value" :key="item.id"
-                  :img-url="item.storageInfo.url"/>
+        <TodoItem v-if="typePanel === 'todo'" @done="done" @remove="remove" v-for="item in state.todo" :typeData="item.storageInfo.type" :id="item.id" :value="item.value" :key="item.id"
+                  :url="item.storageInfo.url"/>
+        <TodoItem v-else @done="done" v-for="item in state.done" :id="item.id" :typeData="item.storageInfo.type" :value="item.value" :key="item.id"
+                  :url="item.storageInfo.url" @remove="remove"/>
       </transition-group>
     </div>
   </Section>
@@ -70,13 +70,14 @@ export default {
     }
 
 
-    const remove = (id, deleteImg) => {
-      if (deleteImg) {
-        const elementRef = ref(storage, deleteImg);
+    const remove = (id, deleteData) => {
+      if (deleteData) {
+        const elementRef = ref(storage, deleteData);
         useRemoveData(elementRef)
       }
 
       const filterTodos = store.state.modal.todos.filter(item => item.id !== id)
+      console.log(filterTodos)
       store.dispatch('changeTodo', filterTodos)
       useWriteData(store.state.modal.todos)
     }
@@ -84,6 +85,7 @@ export default {
     watchEffect(() => {
       if (store.state.modal.todos) {
         state.todo = store.state.modal.todos
+        state.done = store?.state?.modal?.todos.filter(item => item.type === 'done')
       }
       store.state.modal.todos.forEach(item => {
         state.todo = store?.state?.modal?.todos.filter(item => item.type === 'todo')
