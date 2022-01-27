@@ -7,8 +7,10 @@
        @drop.prevent="dropData"
   >
     <div class="modal__drag drag-area">
-      <div class="drag-area__loader --black" v-if="state.loadingStatus">
+      <div class="drag-area__loader" v-if="state.loadingStatus">
         <Loader/>
+        <Button @click="cancelSendData" button-type="button" item-class="drag-area__button button remove"
+                text="Отменить загрузку"/>
       </div>
       <div v-else class="drag-area-info">
         <p v-if="!state.drag" class="drag-area-info__text">Вставьте файл</p>
@@ -55,16 +57,19 @@
 </template>
 
 <script>
-import {reactive} from "vue";
-import {getStorage, ref, uploadBytes, getDownloadURL} from "firebase/storage";
+import {reactive, watchEffect} from "vue";
+import {getStorage, ref, uploadBytes, uploadBytesResumable, getDownloadURL} from "firebase/storage";
 import {useRemoveData} from "../../hooks/useRemoveData";
+import Button from "../../UI/Button";
 
 export default {
+  components: {Button},
   setup(props, {emit}) {
     const storage = getStorage();
 
     const state = reactive({
       drag: false,
+      cancel: false,
       sendDataInfo: {},
       uploadStatus: false,
       activeUpload: false,
@@ -85,17 +90,46 @@ export default {
       }
     })
 
+    let upload;
+
     const sendDataToStorage = (value) => {
       const elementRef = ref(storage, `${JSON.parse(localStorage.getItem('userData')).user.uid}/${state.sendDataInfo.name}`);
       const file = value;
 
       if (Object.values(state.validType).includes(file.type)) {
+
         emit('removeElementRef', elementRef)
 
-        uploadBytes(elementRef, file).then(() => {
+
+        // const uploadTask = uploadBytesResumable(elementRef, file);
+        //
+        // console.log(uploadTask.cancel())
+        //
+        // uploadTask.then(res => console.log(res))
+        // .catch(err => {
+        //   console.log(err)
+        //   throw err
+        // })
+
+
+        upload = uploadBytesResumable(elementRef, file)
+        watchEffect(() => {
+          console.log('change', state.cancel)
+          console.log('state', state)
+          if (state.cancel) {
+            console.log(upload.cancel());
+            state.cancel = false
+            state.loadingStatus = false
+
+          }
+        })
+
+
+        upload.then(() => {
           getDownloadURL(ref(storage, elementRef))
               .then((url) => {
                 if (url) {
+                  console.log('ref', elementRef)
                   state.loadingStatus = false
                   state.dataInfo.elementRef = elementRef
                   state.dataInfo.url = url
@@ -107,9 +141,20 @@ export default {
                 console.log(url)
               })
               .catch((error) => {
-                console.log(error)
+                console.log('error',error)
               });
-        });
+
+        })
+        //     .catch(err => {
+        //   if (state.cancel) {
+        //     upload.cancel()
+        //     console.log('was canceled',state.loadingStatus)
+        //   }
+        //   state.loadingStatus = false
+        //   console.log('err',err)
+        // })
+
+
       } else {
         state.activeUpload = false
         state.uploadStatus = false
@@ -118,6 +163,8 @@ export default {
       }
 
     }
+
+
     const deleteImg = () => {
       if (state.dataInfo.elementRef) {
         useRemoveData(state.dataInfo.elementRef)
@@ -148,8 +195,14 @@ export default {
 
     }
 
+    const cancelSendData = () => {
+      // state.cancel = true
+      console.log(upload.cancel());
+      state.loadingStatus = false
+    }
+
     return {
-      state, dropData, deleteImg
+      state, dropData, deleteImg, cancelSendData
     }
   }
 }

@@ -1,6 +1,6 @@
 .header{
   background: #73d7aa;
-  padding: 10px 0;
+  padding: 20px 0;
   margin-bottom: 50px;
   .account{
     display: flex;
@@ -23,7 +23,7 @@
   .header__logo{
     user-select: none;
     pointer-events: none;
-    max-width: 35px;
+    max-width: 50px;
   }
   .header__wrapper{
     display: flex;

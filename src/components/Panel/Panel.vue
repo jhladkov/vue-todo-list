@@ -3,7 +3,7 @@
     <Title :title="title" :title-class="titleClass"/>
     <div class="panel__inner">
       <transition-group name="list">
-        <TodoItem v-if="typePanel === 'todo'" @done="done" @remove="remove" v-for="item in state.todo" :typeData="item.storageInfo.type" :id="item.id" :value="item.value" :key="item.id"
+        <TodoItem  v-if="typePanel === 'todo'" @done="done" @remove="remove" v-for="item in state.todo" :typeData="item.storageInfo.type" :id="item.id" :value="item.value" :key="item.id"
                   :url="item.storageInfo.url"/>
         <TodoItem v-else @done="done" v-for="item in state.done" :id="item.id" :typeData="item.storageInfo.type" :value="item.value" :key="item.id"
                   :url="item.storageInfo.url" @remove="remove"/>
@@ -46,6 +46,7 @@ export default {
       todo: store?.state?.modal?.todos,
       done: store?.state?.modal?.todos.filter(item => item.type === 'done')
     })
+
     if (props.typePanel === 'done') {
       console.log(state.todo.filter(item => item.type === 'done'))
       state.todo = state.todo.filter(item => item.type === 'done')

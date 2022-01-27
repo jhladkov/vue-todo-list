@@ -4,6 +4,10 @@
       <div class="item__info info-wrapper">
         <div class="info-wrapper__img" v-if="url && typeData === 'image/jpeg' || typeData === 'image/png' || typeData === 'image/webp'">
           <img :src="url" alt="">
+          <div class="info-wrapper__panel panel">
+            <Link :url="url" target="_blank" content="Открыть в новом окне"/>
+            <Link :url = url download content="Скачать"/>
+          </div>
         </div>
         <div v-else-if="url && typeData === 'video/mp4'" class="info-wrapper__video">
           <video controls :src="url"></video>
@@ -28,7 +32,9 @@
 
 <script>
 
+import Button from "../../UI/Button";
 export default {
+  components: {Button},
   props: {
     value: String,
     id: Number,

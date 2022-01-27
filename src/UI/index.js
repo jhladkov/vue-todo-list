@@ -6,6 +6,7 @@ import Title from "./Title";
 import Svg from "./Svg";
 import Background from "./Background";
 import Loader from "./Loader";
+import LinkA from "./LinkA";
 
 export default [
     Button,
@@ -16,4 +17,5 @@ export default [
     Svg,
     Background,
     Loader,
+    LinkA
 ]

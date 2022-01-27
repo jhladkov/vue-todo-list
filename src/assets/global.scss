@@ -3,6 +3,7 @@
 }
 
 body {
+  font-size: 18px;
   margin: 0;
   font-family: 'Inter', sans-serif;
   height: 100vh;
@@ -69,6 +70,7 @@ a {
 
 p {
   margin: 0;
+  font-size: 22px;
 }
 
 span,label{
@@ -81,13 +83,14 @@ label{
 }
 
 .button{
-  background: none;
-  padding: 10px;
+  font-size: 18px;
+  background: white;
+  padding: 15px;
+  min-width: 140px;
   cursor: pointer;
   transition: all .3s;
   outline: none;
   border: 1px solid darkgray;
-  font-size: 12px;
   &:hover{
     background: #73d7aa;
     color: white;
@@ -97,10 +100,11 @@ label{
 }
 
 .input{
-  padding: 10px;
+  padding: 15px;
   border: 1px solid darkgray;
   transition: all .3s;
   outline: none;
+  font-size: 18px;
   &:focus{
     border-color: #73d7aa;
     border-radius: 50px;
@@ -193,9 +197,12 @@ label{
 .drag-area__loader{
   position: absolute;
   z-index: 12;
-  top: 50%;
+  top: 35%;
   left: 50%;
   transform: translate(-50%,-50%);
+  .drag-area__button{
+    margin-top: 140px;
+  }
   .loader{
     &:after{
       border: 6px solid #73d7aa;

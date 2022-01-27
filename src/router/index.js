@@ -3,6 +3,8 @@ import Home from '../views/Home.vue'
 import Login from "../components/Login/Login";
 import store from '@/store'
 
+
+
 const routes = [
   {
     path: '/',

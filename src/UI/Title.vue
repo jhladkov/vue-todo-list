@@ -1,5 +1,5 @@
 <template>
-  <h3 :class="titleClass">{{title}}</h3>
+  <h2 :class="titleClass">{{title}}</h2>
 </template>
 
 <script>

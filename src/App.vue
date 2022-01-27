@@ -3,6 +3,16 @@
     <Header/>
     <div class="main-wrapper">
       <Container>
+        <Section section-class="section control-panel">
+          <div class="control-panel__wrapper">
+            <div class="control-panel__inner">
+              <Button @click="openModel" text="Добавить задачу" item-class="control-panel__add-task button"/>
+            </div>
+            <div class="control-panel__inner">
+              <Button text="Добавить секцию" item-class="control-panel__add-task button"/>
+            </div>
+          </div>
+        </Section>
         <router-view/>
         <div v-if="!state.isLoaded">
           <Loader/>
@@ -37,11 +47,16 @@ export default {
       const data = JSON.parse(localStorage.getItem('userData'))
       store.dispatch('changeAuthStatus', data)
     }
+    const openModel = () => {
+      store.dispatch('changeStatusOpen')
+    }
+
+
 
     watchEffect(() => state.isLoaded = store.state.isLoaded)
 
     return{
-      state
+      state,openModel
     }
   }
 }
