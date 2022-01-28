@@ -88,6 +88,7 @@ label{
   padding: 15px;
   min-width: 140px;
   cursor: pointer;
+  border-radius: 50px;
   transition: all .3s;
   outline: none;
   border: 1px solid darkgray;
@@ -95,7 +96,6 @@ label{
     background: #73d7aa;
     color: white;
     border-color: #73d7aa;
-    border-radius: 50px;
   }
 }
 
@@ -105,9 +105,9 @@ label{
   transition: all .3s;
   outline: none;
   font-size: 18px;
+  border-radius: 50px;
   &:focus{
     border-color: #73d7aa;
-    border-radius: 50px;
   }
 }
 

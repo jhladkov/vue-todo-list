@@ -13,57 +13,52 @@
                 text="Отменить загрузку"/>
       </div>
       <div v-else class="drag-area-info">
-        <p v-if="!state.drag" class="drag-area-info__text">Вставьте файл</p>
+        <div v-if="!state.drag" class="img-wrapper__inner">
+          <Input @getFile="dropData" input-class="button" placeholder="Выберите файл" input-type="file"/>
+        </div>
+        <p v-if="!state.drag" class="drag-area-info__text"> или Вставьте файл</p>
         <p v-else class="drag-area-info__text">Отпустите файл</p>
       </div>
     </div>
+
+
   </div>
-
-
-  <div
+  <DragAndDropResult
+      @deleteData="deleteData"
+      @dropData="dropData"
+      :url="state.dataInfo.url"
+      class-name="modal__inner img-wrapper"
+      type-result="image"
       v-else-if="state.sendDataInfo.type === 'image/jpeg'
       || state.sendDataInfo.type === 'image/png'
-      || state.sendDataInfo.type === 'image/webp'
-      "
-
-      class="modal__inner img-wrapper"
-
-  >
-    <div class="img-wrapper__img">
-      <img :src="state.dataInfo.url" alt="">
-    </div>
-    <div class="img-wrapper__inner">
-      <Input @getFile="dropData" input-class="button" placeholder="Изменить" input-type="file"/>
-      <Button @click="deleteImg" button-type="button" text="Удалить"
-              item-class="img-wrapper__inner__button button remove"/>
-    </div>
-  </div>
-  <div
-      class="modal__inner video-wrapper"
+      || state.sendDataInfo.type === 'image/webp'"
+  />
+  <DragAndDropResult
+      @dropData="dropData"
+      @deleteData="deleteData"
+      :url="state.dataInfo.url"
+      class-name="modal__inner video-wrapper"
+      type-result="video"
       v-else-if="state.sendDataInfo.type === 'video/mp4'"
-  >
-    <video controls :src="state.dataInfo.url"></video>
-
-  </div>
-
-  <div
-      class="modal__inner audio-wrapper"
+  />
+  <DragAndDropResult
+      @dropData="dropData"
+      @deleteData="deleteData"
+      :url="state.dataInfo.url"
+      class-name="modal__inner audio-wrapper"
+      type-result="audio"
       v-else-if="state.sendDataInfo.type === 'audio/mpeg' || state.sendDataInfo.type === 'audio/ogg'"
-  >
-    <audio controls :src="state.dataInfo.url"></audio>
-
-  </div>
-
+  />
 </template>
 
 <script>
 import {reactive, watchEffect} from "vue";
-import {getStorage, ref, uploadBytes, uploadBytesResumable, getDownloadURL} from "firebase/storage";
+import {getStorage, ref, uploadBytesResumable, getDownloadURL} from "firebase/storage";
 import {useRemoveData} from "../../hooks/useRemoveData";
-import Button from "../../UI/Button";
+import DragAndDropResult from "../DragAndDropResult/DragAndDropResult";
 
 export default {
-  components: {Button},
+  components: {DragAndDropResult},
   setup(props, {emit}) {
     const storage = getStorage();
 
@@ -97,21 +92,7 @@ export default {
       const file = value;
 
       if (Object.values(state.validType).includes(file.type)) {
-
         emit('removeElementRef', elementRef)
-
-
-        // const uploadTask = uploadBytesResumable(elementRef, file);
-        //
-        // console.log(uploadTask.cancel())
-        //
-        // uploadTask.then(res => console.log(res))
-        // .catch(err => {
-        //   console.log(err)
-        //   throw err
-        // })
-
-
         upload = uploadBytesResumable(elementRef, file)
         watchEffect(() => {
           console.log('change', state.cancel)
@@ -123,8 +104,6 @@ export default {
 
           }
         })
-
-
         upload.then(() => {
           getDownloadURL(ref(storage, elementRef))
               .then((url) => {
@@ -141,31 +120,18 @@ export default {
                 console.log(url)
               })
               .catch((error) => {
-                console.log('error',error)
+                console.log('error', error)
               });
 
         })
-        //     .catch(err => {
-        //   if (state.cancel) {
-        //     upload.cancel()
-        //     console.log('was canceled',state.loadingStatus)
-        //   }
-        //   state.loadingStatus = false
-        //   console.log('err',err)
-        // })
-
-
       } else {
         state.activeUpload = false
         state.uploadStatus = false
         state.loadingStatus = false
         console.log('errorType', file.type)
       }
-
     }
-
-
-    const deleteImg = () => {
+    const deleteData = () => {
       if (state.dataInfo.elementRef) {
         useRemoveData(state.dataInfo.elementRef)
         state.sendDataInfo.name = ''
@@ -174,13 +140,12 @@ export default {
         state.dataInfo.elementRef = ''
       }
     }
-
     const dropData = (event, wasActiveInput) => {
       state.activeUpload = true
       state.loadingStatus = true
       let file;
       if (wasActiveInput) {
-        deleteImg()
+        deleteData()
         file = event
       } else {
         console.log('drop')
@@ -202,7 +167,7 @@ export default {
     }
 
     return {
-      state, dropData, deleteImg, cancelSendData
+      state, dropData, deleteData, cancelSendData
     }
   }
 }

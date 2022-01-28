@@ -7,7 +7,6 @@
       </div>
       <DragAndDrop @getUrlImg="getImg" @activeUpload="activeUpload" @removeElementRef="setElementRef"/>
       <Form @submit.prevent="createTodo" form-class="modal__form form">
-        <p class="form__error error-message" v-if="v$.$error">Это поле обязательное</p>
         <Input
             v-focus
             @blur="v$.inputText.$touch"
