@@ -1,12 +1,48 @@
-import { createStore } from 'vuex'
+import {createStore} from 'vuex'
+import {modal} from "./modal";
 
 export default createStore({
-  state: {
-  },
-  mutations: {
-  },
-  actions: {
-  },
-  modules: {
-  }
+    state: {
+        isAuth: false,
+        userInfo: {},
+        isLoaded: false
+    },
+    mutations: {
+        setUserInfo(state, payload) {
+            if (payload) {
+                state.userInfo = payload
+            }
+            state.isAuth = true
+        },
+        resetState(state) {
+            state.userInfo = {}
+            state.isAuth = false
+            state.modal.todos = []
+        },
+        setTodo(state, payload) {
+            if (payload) {
+                state.modal.todos = payload
+            }
+        },
+        setLoading(state,payload) {
+            state.isLoaded = payload
+        }
+    },
+    actions: {
+        changeAuthStatus({state, commit}, payload) {
+            commit('setUserInfo', payload)
+        },
+        resetState({state, commit}) {
+            commit('resetState')
+        },
+        changeTodo({commit}, payload) {
+            commit('setTodo',payload)
+        },
+        changeLoadingStatus({commit},payload) {
+            commit('setLoading',payload)
+        }
+    },
+    modules: {
+        modal
+    }
 })

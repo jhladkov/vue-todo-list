@@ -1,12 +1,12 @@
 <template>
   <header class="header">
     <Container>
-      <div class="header__inner">
+      <div class="header__wrapper">
         <div class="header__logo">
           <img src="@/assets/logo.png" alt="">
         </div>
-        <div class="header__add-task">
-          <Button text="Добавить задачу" item-class="header__button button"/>
+        <div class="header__inner">
+          <AccountInfo :src="state.img" :name="state.name" @exit="exit"/>
         </div>
       </div>
     </Container>
@@ -14,11 +14,38 @@
 </template>
 
 <script>
-import Button from "../../UI/Button";
-import Container from "../../hooc/Container";
+import {reactive, watchEffect} from "vue";
+import {useStore} from "vuex";
+import {useRouter} from "vue-router";
+import AccountInfo from "../AccountInfo/AccountInfo";
 
 export default {
-  components: {Container, Button}
+  components: {AccountInfo},
+  setup() {
+
+    const router = useRouter()
+    const store = useStore()
+
+    const state = reactive({
+      name: store?.state?.userInfo?.user?.displayName,
+      img: store?.state?.userInfo?.user?.photoURL
+    })
+
+    watchEffect(() => {
+      state.name = store?.state?.userInfo?.user?.displayName
+      state.img = store?.state?.userInfo?.user?.photoURL
+    })
+
+    const exit = () => {
+      localStorage.removeItem('userData')
+      store.dispatch('resetState')
+      router.push('/login')
+    }
+
+    return {
+      state, exit
+    }
+  }
 }
 </script>
 

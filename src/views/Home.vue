@@ -1,11 +1,46 @@
 <template>
-  <div>
-    Hi
-  </div>
+  <Panel title="Дела" title-class="panel-todo__title title" typePanel="todo"/>
+  <Panel title="Выполненные" title-class="panel-done__title title" typePanel="done"/>
 </template>
 
 <script>
-export default {}
+import Button from "../UI/Button";
+import {useStore} from 'vuex'
+import {onMounted} from "vue";
+import Section from "../hooc/Section";
+import Panel from "../components/Panel/Panel";
+import {getDatabase, ref, get, child} from "firebase/database";
+
+export default {
+  components: {Panel, Section, Button},
+  setup() {
+    const store = useStore()
+
+    const dbRef = ref(getDatabase());
+
+    const getDataTodo = () => {
+      get(child(dbRef, `${JSON.parse(localStorage.getItem('userData')).user.uid}/`)).then((snapshot) => {
+        store.dispatch('changeLoadingStatus',true)
+
+        if (snapshot.exists()) {
+          const data = snapshot.val().data
+          if (data) {
+            store.dispatch('changeTodosArr', data)
+          }
+        } else {
+          console.log("No data available");
+        }
+      }).catch((error) => {
+        console.error(error);
+        getDataTodo()
+
+      });
+    }
+
+    onMounted(() => getDataTodo())
+
+  }
+}
 </script>
 
 <style scoped>
