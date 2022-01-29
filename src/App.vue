@@ -3,7 +3,7 @@
     <Header/>
     <div class="main-wrapper">
       <Container>
-        <Section section-class="section control-panel">
+        <Section v-if="state.isAuth" section-class="section control-panel">
           <div class="control-panel__wrapper">
             <div class="control-panel__inner">
               <Button @click="openModel" text="Добавить задачу" item-class="control-panel__add-task button"/>
@@ -11,6 +11,7 @@
             <div class="control-panel__inner">
               <Button text="Добавить секцию" item-class="control-panel__add-task button"/>
             </div>
+            <Select @selectedOption="setSelectedOptionInStore" className="control-panel__select" typeOpen="bottom"/>
           </div>
         </Section>
         <router-view/>
@@ -40,7 +41,8 @@ export default {
   setup() {
     const store = useStore()
     const state = reactive({
-      isLoaded: store.state.isLoaded
+      isLoaded: store.state.isLoaded,
+      isAuth: store.state.isAuth
     })
 
     if (localStorage.getItem('userData')) {
@@ -50,13 +52,19 @@ export default {
     const openModel = () => {
       store.dispatch('changeStatusOpen')
     }
+    const setSelectedOptionInStore = (value) => {
+      if (value) {
+        store.dispatch('changeSelectedOption',value)
+      }
+    }
 
-
-
-    watchEffect(() => state.isLoaded = store.state.isLoaded)
+    watchEffect(() => {
+      state.isLoaded = store.state.isLoaded
+      state.isAuth = store.state.isAuth
+    })
 
     return{
-      state,openModel
+      state,openModel,setSelectedOptionInStore
     }
   }
 }

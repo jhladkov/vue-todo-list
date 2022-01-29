@@ -3,9 +3,11 @@
     <Title :title="title" :title-class="titleClass"/>
     <div class="panel__inner">
       <transition-group name="list">
-        <TodoItem  v-if="typePanel === 'todo'" @done="done" @remove="remove" v-for="item in state.todo" :typeData="item.storageInfo.type" :id="item.id" :value="item.value" :key="item.id"
+        <TodoItem v-if="typePanel === 'todo'" @done="done" @remove="remove" v-for="item in state.todo"
+                  :typeData="item.storageInfo.type" :id="item.id" :value="item.value" :key="item.id"
                   :url="item.storageInfo.url"/>
-        <TodoItem v-else @done="done" v-for="item in state.done" :id="item.id" :typeData="item.storageInfo.type" :value="item.value" :key="item.id"
+        <TodoItem v-else @done="done" v-for="item in state.done" :id="item.id" :typeData="item.storageInfo.type"
+                  :value="item.value" :key="item.id"
                   :url="item.storageInfo.url" @remove="remove"/>
       </transition-group>
     </div>
@@ -53,20 +55,20 @@ export default {
     }
 
 
-    const done = (id,img,index = null) => {
+    const done = (id, img, index = null) => {
       const arr = store?.state?.modal?.todos
-      arr.forEach((item,elemIndex) => {
+      arr.forEach((item, elemIndex) => {
         if (item.id === id) {
           index = elemIndex
         }
       })
       if (arr[index].type === 'done') {
         arr[index].type = 'todo'
-      }else {
+      } else {
         arr[index].type = 'done'
       }
       console.log(arr)
-      store.dispatch('changeTodosArr',arr)
+      store.dispatch('changeTodosArr', arr)
       useWriteData(arr)
     }
 
@@ -85,17 +87,27 @@ export default {
 
     watchEffect(() => {
       if (store.state.modal.todos) {
-        state.todo = store.state.modal.todos
-        state.done = store?.state?.modal?.todos.filter(item => item.type === 'done')
-      }
-      store.state.modal.todos.forEach(item => {
         state.todo = store?.state?.modal?.todos.filter(item => item.type === 'todo')
-        state.done = store?.state?.modal?.todos.filter(item => item.type === 'done')
-      })
+      }
+      if (store.state.selectedOption) {
+        const filterTodo = state.todo = store?.state?.modal?.todos.filter(item => item.type === 'todo')
+        const filterDone = state.done = store?.state?.modal?.todos.filter(item => item.type === 'done')
+        if (store.state.selectedOption !== 'Все') {
+          state.todo = filterTodo.filter(item => item.section === store.state.selectedOption)
+          state.done = filterDone.filter(item => item.section === store.state.selectedOption)
+        }else {
+          state.todo = filterTodo
+          state.done = filterDone
+        }
+      }
+      // store.state.modal.todos.forEach(item => {
+      //   state.todo = store?.state?.modal?.todos.filter(item => item.type === 'todo')
+      //   state.done = store?.state?.modal?.todos.filter(item => item.type === 'done')
+      // })
     })
 
     return {
-      state, remove,done
+      state, remove, done
     }
   }
 }

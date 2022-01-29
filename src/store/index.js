@@ -5,7 +5,8 @@ export default createStore({
     state: {
         isAuth: false,
         userInfo: {},
-        isLoaded: false
+        isLoaded: false,
+        selectedOption: 'Все',
     },
     mutations: {
         setUserInfo(state, payload) {
@@ -26,6 +27,9 @@ export default createStore({
         },
         setLoading(state,payload) {
             state.isLoaded = payload
+        },
+        setSelectedOption(state,payload) {
+            state.selectedOption = payload
         }
     },
     actions: {
@@ -40,6 +44,9 @@ export default createStore({
         },
         changeLoadingStatus({commit},payload) {
             commit('setLoading',payload)
+        },
+        changeSelectedOption ({commit},payload) {
+            commit('setSelectedOption',payload)
         }
     },
     modules: {

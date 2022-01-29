@@ -7,18 +7,22 @@
       </div>
       <DragAndDrop @getUrlImg="getImg" @activeUpload="activeUpload" @removeElementRef="setElementRef"/>
       <Form @submit.prevent="createTodo" form-class="modal__form form">
-        <Input
-            v-focus
-            @blur="v$.inputText.$touch"
-            v-model.trim="state.inputText"
-            :input-class="v$.$error ? 'form__input input error-message' : 'form__input input' "
+        <div class="form__inner">
+          <Input
+              v-focus
+              @blur="v$.inputText.$touch"
+              v-model.trim="state.inputText"
+              :input-class="v$.$error ? 'form__input input error-message' : 'form__input input' "
 
-        />
+          />
+          <Select @selectedOption="setSection" className="form__select" typeOpen="top"/>
+        </div>
         <Button
             item-class="form__button button"
             text="Добавить задачу"
             button-type="submit"
         />
+
       </Form>
     </div>
   </Section>
@@ -38,7 +42,7 @@ import {useRemoveData} from "../hooks/useRemoveData";
 
 
 export default {
-  components: { DragAndDrop, Form},
+  components: {DragAndDrop, Form},
   props: {
     title: {
       type: String,
@@ -50,6 +54,7 @@ export default {
 
     const state = reactive({
       inputText: '',
+      section: 'Все',
       storageData: {
         url: '',
         type: ''
@@ -76,7 +81,12 @@ export default {
       state.storageData.url = payload
     }
 
-    const activeUpload = (value,typeData) => {
+    const setSection = (value) => {
+      if (value) {
+        state.section = value
+      }
+    }
+    const activeUpload = (value, typeData) => {
       state.storageData.type = typeData
       state.activeUpload = value
     }
@@ -89,7 +99,7 @@ export default {
 
     const createTodo = () => {
       if (!v$.value.$error && !state.activeUpload) {
-        const obj = useObjectTodo('', 'todo', state.inputText, state.storageData.url,state.storageData.type, Math.floor(Math.random() * 1000000))
+        const obj = useObjectTodo(state.section, 'todo', state.inputText, state.storageData.url, state.storageData.type, Math.floor(Math.random() * 1000000))
 
         useWriteData([...store.state.modal.todos, obj])
 
@@ -102,7 +112,7 @@ export default {
       }
     }
     return {
-      closeModel, state, v$, createTodo, getImg, activeUpload,setElementRef
+      closeModel, state, v$, createTodo, getImg, activeUpload, setElementRef, setSection
     }
   }
 }
