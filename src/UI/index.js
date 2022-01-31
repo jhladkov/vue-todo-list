@@ -8,6 +8,7 @@ import Background from "./Background";
 import Loader from "./Loader";
 import LinkA from "./LinkA";
 import Select from "./Select";
+import ReusableWindow from "./ReusableWindow";
 
 export default [
     Button,
@@ -19,5 +20,6 @@ export default [
     Svg,
     Background,
     Loader,
-    LinkA
+    LinkA,
+    ReusableWindow
 ]

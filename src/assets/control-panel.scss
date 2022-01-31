@@ -14,4 +14,64 @@
   }
 }
 
+.top {
+  #options{
+    bottom: 46px;
+  }
+}
+
+.select {
+  position: relative;
+
+  .select__title {
+    user-select: none;
+    cursor: pointer;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid darkgray;
+  }
+
+  .options {
+    background: white;
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 11111;
+    text-align: center;
+    border: 1px solid darkgray;
+    margin-bottom: 10px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .options__item {
+      position: relative;
+      cursor: pointer;
+      padding: 10px;
+      transition: all .3s;
+
+
+
+      &:hover {
+        color: white;
+        background: #73d7aa;
+      }
+    }
+  }
+}
+
+
+svg{
+  position: absolute;
+  right: -35px;
+  top: 14px;
+  transition: all .3s;
+  &:hover{
+    fill: red;
+    .select .options .options__item{
+      background: red;
+    }
+  }
+}
 

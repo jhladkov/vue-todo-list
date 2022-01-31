@@ -44,6 +44,9 @@ li, ul {
   padding: 0;
   list-style: none;
 }
+svg{
+  max-width: 20px;
+}
 
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
@@ -155,6 +158,10 @@ label {
   margin-right: 10px;
 }
 
+.list-move{
+  transition: transform 0.8s ease;
+}
+
 .list-enter-active,
 .list-leave-active {
   transition: all 1s ease;
@@ -223,46 +230,3 @@ label {
   }
 }
 
-.top {
-  #options{
-    bottom: 46px;
-  }
-}
-
-.select {
-  position: relative;
-
-  .select__title {
-    user-select: none;
-    cursor: pointer;
-    text-align: center;
-    padding: 10px;
-    border: 1px solid darkgray;
-  }
-
-  .options {
-    background: white;
-    position: absolute;
-    left: 0;
-    right: 0;
-    z-index: 11111;
-    text-align: center;
-    border: 1px solid darkgray;
-    margin-bottom: 10px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    .options__item {
-      cursor: pointer;
-      padding: 10px;
-      transition: all .3s;
-
-      &:hover {
-        color: white;
-        background: #73d7aa;
-      }
-    }
-  }
-}

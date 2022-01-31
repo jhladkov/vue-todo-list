@@ -1,10 +1,15 @@
 <template>
   <Section :section-class="`section panel ${typePanel}`">
-    <Title :title="title" :title-class="titleClass"/>
+    <div class="section__inner">
+      <Title :title="title" :title-class="titleClass"/>
+      <slot></slot>
+    </div>
     <div class="panel__inner">
       <transition-group name="list">
         <TodoItem v-if="typePanel === 'todo'" @done="done" @remove="remove" v-for="item in state.todo"
+                  @selectedOption="rewritePriority"
                   :typeData="item.storageInfo.type" :id="item.id" :value="item.value" :key="item.id"
+                  :priority="item.priority"
                   :url="item.storageInfo.url"/>
         <TodoItem v-else @done="done" v-for="item in state.done" :id="item.id" :typeData="item.storageInfo.type"
                   :value="item.value" :key="item.id"
@@ -69,9 +74,19 @@ export default {
       }
       console.log(arr)
       store.dispatch('changeTodosArr', arr)
-      useWriteData(arr)
+      useWriteData('todo', {data: arr})
     }
 
+
+    const rewritePriority = (value, id) => {
+      store?.state?.modal?.todos.map(item => {
+        if (item.id === id) {
+          item.priority = value
+        }
+      })
+      store.dispatch('changeTodosArr', store.state.modal.todos)
+      useWriteData('todo', {data: store.state.modal.todos})
+    }
 
     const remove = (id, deleteData) => {
       if (deleteData) {
@@ -82,7 +97,11 @@ export default {
       const filterTodos = store.state.modal.todos.filter(item => item.id !== id)
       console.log(filterTodos)
       store.dispatch('changeTodo', filterTodos)
-      useWriteData(store.state.modal.todos)
+      useWriteData('todo', {data: store.state.modal.todos})
+    }
+
+    const comparePriority = (a,b) => {
+      return b.priority - a.priority
     }
 
     watchEffect(() => {
@@ -90,24 +109,20 @@ export default {
         state.todo = store?.state?.modal?.todos.filter(item => item.type === 'todo')
       }
       if (store.state.selectedOption) {
-        const filterTodo = state.todo = store?.state?.modal?.todos.filter(item => item.type === 'todo')
+        const filterTodo = state.todo = store?.state?.modal?.todos.filter(item => item.type === 'todo').sort(comparePriority)
         const filterDone = state.done = store?.state?.modal?.todos.filter(item => item.type === 'done')
         if (store.state.selectedOption !== 'Все') {
           state.todo = filterTodo.filter(item => item.section === store.state.selectedOption)
           state.done = filterDone.filter(item => item.section === store.state.selectedOption)
-        }else {
+        } else {
           state.todo = filterTodo
           state.done = filterDone
         }
       }
-      // store.state.modal.todos.forEach(item => {
-      //   state.todo = store?.state?.modal?.todos.filter(item => item.type === 'todo')
-      //   state.done = store?.state?.modal?.todos.filter(item => item.type === 'done')
-      // })
     })
 
     return {
-      state, remove, done
+      state, remove, done, rewritePriority
     }
   }
 }

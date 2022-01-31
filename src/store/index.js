@@ -5,6 +5,7 @@ export default createStore({
     state: {
         isAuth: false,
         userInfo: {},
+        sections: [{id: Math.floor(Math.random() * 1000000), value: 'Все'}],
         isLoaded: false,
         selectedOption: 'Все',
     },
@@ -30,6 +31,9 @@ export default createStore({
         },
         setSelectedOption(state,payload) {
             state.selectedOption = payload
+        },
+        setSections(state,payload) {
+            state.sections = payload
         }
     },
     actions: {
@@ -47,6 +51,9 @@ export default createStore({
         },
         changeSelectedOption ({commit},payload) {
             commit('setSelectedOption',payload)
+        },
+        changeSection ({commit},payload) {
+            commit('setSections',payload)
         }
     },
     modules: {

@@ -15,7 +15,7 @@
               :input-class="v$.$error ? 'form__input input error-message' : 'form__input input' "
 
           />
-          <Select @selectedOption="setSection" className="form__select" typeOpen="top"/>
+          <Select text="Секция: " @selectedOption="setSection" className="form__select" typeOpen="top" :options="state.options"/>
         </div>
         <Button
             item-class="form__button button"
@@ -32,17 +32,18 @@
 <script>
 import {useStore} from "vuex";
 import Form from "./Form/Form";
-import {reactive} from "vue";
+import {reactive, watchEffect} from "vue";
 import useVuelidate from '@vuelidate/core'
 import {required} from '@vuelidate/validators'
 import {useObjectTodo} from "../hooks/useObjectTodo";
 import {useWriteData} from "../hooks/useWriteData";
 import DragAndDrop from "./DragAndDrop/DragAndDrop";
 import {useRemoveData} from "../hooks/useRemoveData";
+import Select from "../UI/Select";
 
 
 export default {
-  components: {DragAndDrop, Form},
+  components: {Select, DragAndDrop, Form},
   props: {
     title: {
       type: String,
@@ -55,6 +56,7 @@ export default {
     const state = reactive({
       inputText: '',
       section: 'Все',
+      options: store.state.sections,
       storageData: {
         url: '',
         type: ''
@@ -99,9 +101,9 @@ export default {
 
     const createTodo = () => {
       if (!v$.value.$error && !state.activeUpload) {
-        const obj = useObjectTodo(state.section, 'todo', state.inputText, state.storageData.url, state.storageData.type, Math.floor(Math.random() * 1000000))
+        const obj = useObjectTodo(state.section,1, 'todo', state.inputText, state.storageData.url, state.storageData.type, Math.floor(Math.random() * 1000000))
 
-        useWriteData([...store.state.modal.todos, obj])
+        useWriteData('todo',{data: [...store.state.modal.todos, obj] })
 
         store.dispatch('changeTodosArr', [...store.state.modal.todos, obj])
         closeModel(false)
@@ -111,6 +113,11 @@ export default {
         console.log('error', v$.value.$error)
       }
     }
+
+    watchEffect(() => {
+      state.options = store.state.sections
+    })
+
     return {
       closeModel, state, v$, createTodo, getImg, activeUpload, setElementRef, setSection
     }
