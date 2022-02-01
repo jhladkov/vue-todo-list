@@ -76,7 +76,6 @@ export default {
     const storage = getStorage();
 
     const state = reactive({
-      wasEffect: false,
       stopRecording: false,
       itemsRecorder: [],
       drag: false,
@@ -189,8 +188,6 @@ export default {
       if (active) {
         state.stopRecording = false   //
       }
-
-      state.wasEffect = false
       state.testRecorder.url = ''
       state.recordingAudioStatus = !state.recordingAudioStatus
       if (!Array.isArray(state.itemsRecorder)) {
@@ -198,117 +195,42 @@ export default {
       }
 
 
-      // console.log('recorstatus', state.recordingAudioStatus)
-
       const device = navigator.mediaDevices.getUserMedia({audio: true})
       let items = [];
       device.then(stream => {
-        // console.log('stream', stream)
         const recorder = new MediaRecorder(stream)
 
         if (recorder.state !== 'recorder') {
           recorder.ondataavailable = e => {
-            console.log(recorder.state)
             if (!state.stopRecording) {
               items.push(e.data)
-              console.log('itemLenght', items.length, items)
               if (Array.isArray(state.itemsRecorder)) {
-                console.log('yes')
                 state.itemsRecorder = items
               }
             } else {
-              console.log('stop')
               recorder.stop()
               items = []
             }
           }
         }
-
-
         if (active) {
-          console.log('start because active is true')
           recorder.start(100)
         } else {
-          if (!state.wasEffect) {
-            state.wasEffect = true
-            try {
-              if (!state.recordingAudioStatus) {
-                state.recordingAudioStatus = false
-
-                // console.log(state.recordingAudioStatus, 'erseafascasd')
-                console.log('watchEffectisWork')
-                const blob = URL.createObjectURL(new Blob(state.itemsRecorder, {type: 'audio/webm'}))
-                if (!state.testRecorder.url) {
-                  console.log('state.itemsRecorder',state.itemsRecorder)
-                  console.log('blob', blob)
-                  // console.log('state', recorder.state)
-                  state.testRecorder.url = blob
-                }
-                // console.log('beforeStop',recorder.state )
-                if (recorder.state !== 'inactive') {
-                  console.log('wasStopped because is not innactive')
-                  state.stopRecording = true
-                  recorder.stop()
-                  items = []
-                  state.itemsRecorder = null
-
-                } else {
-                  state.stopRecording = true
-                  state.itemsRecorder = null
-                  items = []
-                  console.log('was not stopped', recorder.state)
-                }
+          try {
+            if (!state.recordingAudioStatus) {
+              state.recordingAudioStatus = false
+              state.stopRecording = true
+              const blob = URL.createObjectURL(new Blob(state.itemsRecorder, {type: 'audio/webm'}))
+              if (!state.testRecorder.url) {
+                state.testRecorder.url = blob
+                state.itemsRecorder = null
               }
-            } catch (err) {
-              // console.log('recorder state3 err', recorder.state)
-              console.log(err)
             }
-          } else {
-            console.log('not effect', recorder.state)
+          }catch (err) {
+            console.log(err)
           }
         }
-
-        // watchEffect(() => {
-        //
-        //   // console.log('state', recorder.state)
-        //   if (!state.wasEffect) {
-        //     state.stateRecorder = recorder.state//
-        //     // state.wasEffect = true
-        //     try {
-        //       if (!state.recordingAudioStatus) {
-        //         state.recordingAudioStatus = false
-        //
-        //         // console.log(state.recordingAudioStatus, 'erseafascasd')
-        //         console.log('watchEffectisWork')
-        //         const blob = URL.createObjectURL(new Blob(items, {type: 'audio/webm'}))
-        //         if (!state.testRecorder.url) {
-        //           console.log('blob', blob)
-        //           // console.log('state', recorder.state)
-        //           state.testRecorder.url = blob
-        //         }
-        //         // console.log('beforeStop',recorder.state )
-        //         if (recorder.state !== 'inactive') {
-        //           console.log('wasStopped because is not innactive')
-        //           recorder.stop()
-        //           state.stateRecorder = recorder.state //
-        //         } else {
-        //           console.log('was not stopped', recorder.state)
-        //         }
-        //       }
-        //     } catch (err) {
-        //       // console.log('recorder state3 err', recorder.state)
-        //       console.log(err)
-        //     }
-        //   } else {
-        //     console.log('not effect', recorder.state)
-        //   }
-        //
-        // })
-
       })
-          .catch(err => {
-            throw err
-          })
     }
 
 
