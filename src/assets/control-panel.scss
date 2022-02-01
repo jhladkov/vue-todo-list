@@ -51,6 +51,19 @@
       padding: 10px;
       transition: all .3s;
 
+      svg{
+        position: absolute;
+        right: -35px;
+        top: 14px;
+        transition: all .3s;
+        &:hover{
+          fill: red;
+          .select .options .options__item{
+            background: red;
+          }
+        }
+      }
+
 
 
       &:hover {
@@ -62,16 +75,5 @@
 }
 
 
-svg{
-  position: absolute;
-  right: -35px;
-  top: 14px;
-  transition: all .3s;
-  &:hover{
-    fill: red;
-    .select .options .options__item{
-      background: red;
-    }
-  }
-}
+
 

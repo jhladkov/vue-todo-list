@@ -20,6 +20,8 @@
                 :options="state.options"
             />
           </div>
+
+
         </Section>
         <router-view/>
         <div v-if="!state.isLoaded">
@@ -47,7 +49,7 @@
 import Header from "./components/Header/Header";
 import Modal from "./components/Modal";
 import {useStore} from "vuex";
-import {reactive, watchEffect} from "vue";
+import {onMounted, reactive, watchEffect} from "vue";
 import {useWriteData} from "./hooks/useWriteData";
 import Form from "./components/Form/Form";
 import Select from "./UI/Select";
@@ -63,7 +65,7 @@ export default {
       options: store.state?.sections,
       sectionName: '',
       openWindow: false,
-      error: null
+      error: null,
     })
 
     if (localStorage.getItem('userData')) {
@@ -91,10 +93,34 @@ export default {
       }
     }
 
+    // onMounted(() => {
+    //   const device = navigator.mediaDevices.getUserMedia({audio: true})
+    //   let items = []
+    //   device.then(stream => {
+    //     console.log(stream)
+    //     const recorder = new MediaRecorder(stream)
+    //     console.log(recorder)
+    //     recorder.ondataavailable = e => {
+    //       console.log('event', e)
+    //       items.push(e.data)
+    //     }
+    //     recorder.start(100)
+    //     setTimeout(() => {
+    //       console.log('stop')
+    //       const blob = URL.createObjectURL(new Blob(items, {type: 'audio/webm'}))
+    //       state.testRecorder.url = blob
+    //       console.log('blob',blob)
+    //       recorder.stop()
+    //     }, 1000)
+    //   })
+    //
+    //   console.log(device)
+    // })
+
     watchEffect(() => {
       if (!state.sectionName) {
         state.error = true
-      }else {
+      } else {
         state.error = false
       }
       state.isLoaded = store.state.isLoaded

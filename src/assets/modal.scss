@@ -75,6 +75,8 @@
 
       .drag-area-info {
         display: flex;
+        flex-wrap: wrap;
+        max-width: 400px;
         align-items: baseline;
         justify-content: center;
         width: 100%;
@@ -83,6 +85,21 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        .drag-area-info__inner{
+          align-items: center;
+          margin-top: 20px;
+          display: flex;
+          .drag-area-info__text{
+            margin-right: 10px;
+          }
+        }
+        .drag-area-info__svg{
+          max-width: 70px;
+          transition: all .3s;
+          &:hover{
+            fill: #73d7aa;
+          }
+        }
       }
     }
   }

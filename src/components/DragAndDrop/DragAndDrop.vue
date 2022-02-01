@@ -17,6 +17,18 @@
           <Input @getFile="dropData" input-class="button" placeholder="Выберите файл" input-type="file"/>
         </div>
         <p v-if="!state.drag" class="drag-area-info__text"> или Вставьте файл</p>
+        <div v-if="!state.drag" class="drag-area-info__inner">
+          <audio controls v-show="state.testRecorder.url" class="testElement" :src="state.testRecorder.url"></audio>
+
+          <p class="drag-area-info__text"> или </p>
+          <Svg v-if="!state.recordingAudioStatus" @click="recordingAudio" view-box="0 0 32 32"
+               class-svg="drag-area-info__svg svg"
+               path="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM12 9l12 7-12 7z"/>
+          <Svg v-if="state.recordingAudioStatus" @click="recordingAudio" view-box="0 0 32 32"
+               class-svg="drag-area-info__svg svg"
+               path="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM10 10h4v12h-4zM18 10h4v12h-4z"/>
+        </div>
+
         <p v-else class="drag-area-info__text">Отпустите файл</p>
       </div>
     </div>
@@ -56,19 +68,24 @@ import {reactive, watchEffect} from "vue";
 import {getStorage, ref, uploadBytesResumable, getDownloadURL} from "firebase/storage";
 import {useRemoveData} from "../../hooks/useRemoveData";
 import DragAndDropResult from "../DragAndDropResult/DragAndDropResult";
+import Svg from "../../UI/Svg";
 
 export default {
-  components: {DragAndDropResult},
+  components: {Svg, DragAndDropResult},
   setup(props, {emit}) {
     const storage = getStorage();
 
     const state = reactive({
       drag: false,
       cancel: false,
+      recordingAudioStatus: false,
       sendDataInfo: {},
       uploadStatus: false,
       activeUpload: false,
       loadingStatus: false,
+      testRecorder: {
+        url: ''
+      },
       validType: [
         'image/png',
         'text/plain',
@@ -90,6 +107,9 @@ export default {
     const sendDataToStorage = (value) => {
       const elementRef = ref(storage, `${JSON.parse(localStorage.getItem('userData')).user.uid}/${state.sendDataInfo.name}`);
       const file = value;
+
+      console.log('elemRef', elementRef)
+      console.log('state.sendDataInfo.name', state.sendDataInfo.name)
 
       if (Object.values(state.validType).includes(file.type)) {
         emit('removeElementRef', elementRef)
@@ -160,14 +180,49 @@ export default {
 
     }
 
+    const recordingAudio = () => {
+      state.testRecorder.url = ''
+      state.recordingAudioStatus = !state.recordingAudioStatus
+
+
+      const device = navigator.mediaDevices.getUserMedia({audio: true})
+      let items = []
+      device.then(stream => {
+        console.log('stream', stream)
+        const recorder = new MediaRecorder(stream)
+        console.log('recorder',recorder)
+        recorder.ondataavailable = e => {
+          console.log('e', e)
+          items.push(e.data)
+        }
+        recorder.start(100)
+        watchEffect(() => {
+          if (!state.recordingAudioStatus) {
+            console.log(state.recordingAudioStatus, 'erseafascasd')
+            console.log('watchEffectisWork')
+            console.log('stop')
+            const blob = URL.createObjectURL(new Blob(items, {type: 'audio/webm'}))
+            if (!state.testRecorder.url) {
+              console.log('blob', blob)
+              state.testRecorder.url = blob
+            }
+            recorder.stop()
+          }
+        })
+      })
+      .catch(err => {
+        throw err
+      })
+    }
+
+
     const cancelSendData = () => {
-      // state.cancel = true
       console.log(upload.cancel());
       state.loadingStatus = false
     }
 
     return {
-      state, dropData, deleteData, cancelSendData
+      state, dropData, deleteData, cancelSendData, recordingAudio
     }
   }
 }
