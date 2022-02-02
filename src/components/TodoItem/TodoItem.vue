@@ -14,7 +14,7 @@
         <div v-else-if="url && typeData === 'video/mp4'" class="info-wrapper__video">
           <video controls :src="url"></video>
         </div>
-        <div class="info-wrapper__audio" v-else-if="url && typeData === 'audio/mpeg' || typeData === 'audio/ogg'">
+        <div class="info-wrapper__audio" v-else-if="url && typeData === 'audio/mpeg' || typeData === 'audio/ogg' || typeData === 'audio/webm'">
           <audio controls :src="url"></audio>
         </div>
         <p class="item__text">{{ value }}</p>

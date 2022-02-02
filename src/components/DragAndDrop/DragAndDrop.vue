@@ -59,7 +59,7 @@
       :url="state.dataInfo.url"
       class-name="modal__inner audio-wrapper"
       type-result="audio"
-      v-else-if="state.sendDataInfo.type === 'audio/mpeg' || state.sendDataInfo.type === 'audio/ogg'"
+      v-else-if="state.sendDataInfo.type === 'audio/mpeg' || state.sendDataInfo.type === 'audio/ogg' || state.sendDataInfo.type === 'audio/webm'"
   />
 </template>
 
@@ -96,7 +96,8 @@ export default {
         'video/x-matroska',
         'audio/mpeg',
         'image/webp',
-        'audio/ogg'
+        'audio/ogg',
+        'audio/webm',
       ],
       dataInfo: {
         url: '',
@@ -106,19 +107,19 @@ export default {
 
     let upload;
 
-    const sendDataToStorage = (value) => {
+    const sendDataToStorage = (value,isBlob) => {
+      state.loadingStatus = true
       const elementRef = ref(storage, `${JSON.parse(localStorage.getItem('userData')).user.uid}/${state.sendDataInfo.name}`);
       const file = value;
+      console.log('filesend',file)
 
       console.log('elemRef', elementRef)
       console.log('state.sendDataInfo.name', state.sendDataInfo.name)
 
-      if (Object.values(state.validType).includes(file.type)) {
+      if (Object.values(state.validType).includes(file.type) || isBlob) {
         emit('removeElementRef', elementRef)
         upload = uploadBytesResumable(elementRef, file)
         watchEffect(() => {
-          console.log('change', state.cancel)
-          console.log('state', state)
           if (state.cancel) {
             console.log(upload.cancel());
             state.cancel = false
@@ -150,7 +151,7 @@ export default {
         state.activeUpload = false
         state.uploadStatus = false
         state.loadingStatus = false
-        console.log('errorType', file.type)
+        console.log('errorType', file)
       }
     }
     const deleteData = () => {
@@ -164,7 +165,6 @@ export default {
     }
     const dropData = (event, wasActiveInput) => {
       state.activeUpload = true
-      state.loadingStatus = true
       let file;
       if (wasActiveInput) {
         deleteData()
@@ -184,7 +184,6 @@ export default {
 
 
     const recordingAudio = (active) => {
-
       if (active) {
         state.stopRecording = false   //
       }
@@ -193,13 +192,10 @@ export default {
       if (!Array.isArray(state.itemsRecorder)) {
         state.itemsRecorder = []
       }
-
-
       const device = navigator.mediaDevices.getUserMedia({audio: true})
       let items = [];
       device.then(stream => {
         const recorder = new MediaRecorder(stream)
-
         if (recorder.state !== 'recorder') {
           recorder.ondataavailable = e => {
             if (!state.stopRecording) {
@@ -214,16 +210,20 @@ export default {
           }
         }
         if (active) {
-          recorder.start(100)
+          recorder.start(10)
         } else {
           try {
             if (!state.recordingAudioStatus) {
               state.recordingAudioStatus = false
               state.stopRecording = true
-              const blob = URL.createObjectURL(new Blob(state.itemsRecorder, {type: 'audio/webm'}))
+              const blob = new Blob(state.itemsRecorder, {type: 'audio/webm'})
+              console.log(blob)
               if (!state.testRecorder.url) {
                 state.testRecorder.url = blob
+                state.sendDataInfo.name = recorder.stream.id
+                state.sendDataInfo.type = 'audio/webm'
                 state.itemsRecorder = null
+                sendDataToStorage(blob,true)
               }
             }
           }catch (err) {
@@ -232,13 +232,10 @@ export default {
         }
       })
     }
-
-
     const cancelSendData = () => {
-      console.log(upload.cancel());
+      upload.cancel();
       state.loadingStatus = false
     }
-
     return {
       state, dropData, deleteData, cancelSendData, recordingAudio
     }
