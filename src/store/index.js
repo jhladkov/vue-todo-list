@@ -5,7 +5,7 @@ export default createStore({
     state: {
         isAuth: false,
         userInfo: {},
-        sections: [{id: Math.floor(Math.random() * 1000000), value: 'Все'}],
+        sections: [{id: Math.floor(Math.random() * 1000000), value: 'Все',notDelete: true}],
         isLoaded: false,
         selectedOption: 'Все',
     },

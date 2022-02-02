@@ -14,9 +14,10 @@
             </div>
             <Select
                 @selectedOption="setSelectedOptionInStore"
+                @removeSection="removeSection"
                 className="control-panel__select"
                 typeOpen="bottom"
-                text="Секции: "
+                text="Секция: "
                 :options="state.options"
             />
           </div>
@@ -49,10 +50,11 @@
 import Header from "./components/Header/Header";
 import Modal from "./components/Modal";
 import {useStore} from "vuex";
-import {onMounted, reactive, watchEffect} from "vue";
+import {reactive, watchEffect} from "vue";
 import {useWriteData} from "./hooks/useWriteData";
 import Form from "./components/Form/Form";
 import Select from "./UI/Select";
+
 
 
 export default {
@@ -93,29 +95,14 @@ export default {
       }
     }
 
-    // onMounted(() => {
-    //   const device = navigator.mediaDevices.getUserMedia({audio: true})
-    //   let items = []
-    //   device.then(stream => {
-    //     console.log(stream)
-    //     const recorder = new MediaRecorder(stream)
-    //     console.log(recorder)
-    //     recorder.ondataavailable = e => {
-    //       console.log('event', e)
-    //       items.push(e.data)
-    //     }
-    //     recorder.start(100)
-    //     setTimeout(() => {
-    //       console.log('stop')
-    //       const blob = URL.createObjectURL(new Blob(items, {type: 'audio/webm'}))
-    //       state.testRecorder.url = blob
-    //       console.log('blob',blob)
-    //       recorder.stop()
-    //     }, 1000)
-    //   })
-    //
-    //   console.log(device)
-    // })
+    const removeSection = (id,sectionName) => {
+      const filterSection = store.state.sections.filter(item => item.id !== id)
+      const filterTodos = store.state.modal.todos.filter(item => item.section !== sectionName)
+      store.dispatch('changeSection', filterSection)
+      store.dispatch('changeTodosArr',filterTodos)
+      useWriteData('sections',{data: filterSection})
+      useWriteData('todo',{data: filterTodos})
+    }
 
     watchEffect(() => {
       if (!state.sectionName) {
@@ -129,7 +116,7 @@ export default {
     })
 
     return {
-      state, openModel, setSelectedOptionInStore, addSection
+      state, openModel, setSelectedOptionInStore, addSection, removeSection
     }
   }
 }

@@ -3,6 +3,7 @@
     <Select
         @selectedOption="test"
         default-selected-value="По приоритету"
+        :possibility-to-delete="false"
         type-open="bottom"
         class-name="panel-todo__filter-select"
         :options="state.options"
@@ -60,6 +61,7 @@ export default {
             store.dispatch('changeSection', data)
           }
         } else {
+          store.dispatch('changeSection', [{id: Math.floor(Math.random() * 1000000), value: 'Все',notDelete: true}])
           console.log("No data available");
         }
       }).catch((error) => {

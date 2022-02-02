@@ -22,6 +22,7 @@
       <Select
           @selectedOption="rewritePriority"
           v-if="priority"
+          :possibility-to-delete="false"
           :default-selected-value="priority"
           text="Приоритет: "
           :options="state.options"

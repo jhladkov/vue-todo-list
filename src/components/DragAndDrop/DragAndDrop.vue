@@ -18,8 +18,6 @@
         </div>
         <p v-if="!state.drag" class="drag-area-info__text"> или Вставьте файл</p>
         <div v-if="!state.drag" class="drag-area-info__inner">
-          <audio controls v-show="state.testRecorder.url" class="testElement" :src="state.testRecorder.url"></audio>
-
           <p class="drag-area-info__text"> или </p>
           <Svg v-if="!state.recordingAudioStatus" @click="recordingAudio(true)" view-box="0 0 32 32"
                class-svg="drag-area-info__svg svg"
@@ -85,9 +83,6 @@ export default {
       uploadStatus: false,
       activeUpload: false,
       loadingStatus: false,
-      testRecorder: {
-        url: ''
-      },
       validType: [
         'image/png',
         'text/plain',
@@ -107,11 +102,15 @@ export default {
 
     let upload;
 
-    const sendDataToStorage = (value,isBlob) => {
+    const sendDataToStorage = (value, isBlob) => {
+      if (isBlob) {
+        emit('activeUpload', true, 'audio/webm')
+      }
+      state.activeUpload = true
       state.loadingStatus = true
       const elementRef = ref(storage, `${JSON.parse(localStorage.getItem('userData')).user.uid}/${state.sendDataInfo.name}`);
       const file = value;
-      console.log('filesend',file)
+      console.log('filesend', file)
 
       console.log('elemRef', elementRef)
       console.log('state.sendDataInfo.name', state.sendDataInfo.name)
@@ -164,7 +163,6 @@ export default {
       }
     }
     const dropData = (event, wasActiveInput) => {
-      state.activeUpload = true
       let file;
       if (wasActiveInput) {
         deleteData()
@@ -185,9 +183,9 @@ export default {
 
     const recordingAudio = (active) => {
       if (active) {
+        emit('activeUpload', true, state.sendDataInfo.type)
         state.stopRecording = false   //
       }
-      state.testRecorder.url = ''
       state.recordingAudioStatus = !state.recordingAudioStatus
       if (!Array.isArray(state.itemsRecorder)) {
         state.itemsRecorder = []
@@ -217,16 +215,14 @@ export default {
               state.recordingAudioStatus = false
               state.stopRecording = true
               const blob = new Blob(state.itemsRecorder, {type: 'audio/webm'})
-              console.log(blob)
-              if (!state.testRecorder.url) {
-                state.testRecorder.url = blob
-                state.sendDataInfo.name = recorder.stream.id
-                state.sendDataInfo.type = 'audio/webm'
-                state.itemsRecorder = null
-                sendDataToStorage(blob,true)
+              state.sendDataInfo.name = recorder.stream.id
+              state.sendDataInfo.type = 'audio/webm'
+              state.itemsRecorder = null
+              if (blob) {
+                sendDataToStorage(blob, true)
               }
             }
-          }catch (err) {
+          } catch (err) {
             console.log(err)
           }
         }
@@ -234,7 +230,8 @@ export default {
     }
     const cancelSendData = () => {
       upload.cancel();
-      state.loadingStatus = false
+      state.loadingStatus = false,
+          emit('activeUpload', false, state.sendDataInfo.type)
     }
     return {
       state, dropData, deleteData, cancelSendData, recordingAudio
