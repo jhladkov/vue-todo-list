@@ -2,7 +2,11 @@
   padding-bottom: 20px;
   margin-bottom: 20px;
   border-bottom: 1px solid darkgray;
+  .control-panel__select{
+    min-width: 250px;
+  }
   .control-panel__wrapper{
+    align-items: center;
     display: flex;
     .control-panel__inner{
       margin-right: 20px;
@@ -12,5 +16,13 @@
     }
   }
 }
+
+.top {
+  #options{
+    bottom: 46px;
+  }
+}
+
+
 
 

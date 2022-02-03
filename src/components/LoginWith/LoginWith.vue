@@ -1,9 +1,9 @@
 <template>
   <div @click="login" class="login__item item">
-    <Svg :path="path"
-         :viewBox="viewBox"
-         :classSvg="classSvg"
-    />
+<!--    <Svg :path="path"-->
+<!--         :viewBox="viewBox"-->
+<!--         :classSvg="classSvg"-->
+<!--    />-->
     <p>Продолжить через {{ title }}</p>
   </div>
 </template>

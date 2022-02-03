@@ -17,6 +17,16 @@
           <Input @getFile="dropData" input-class="button" placeholder="Выберите файл" input-type="file"/>
         </div>
         <p v-if="!state.drag" class="drag-area-info__text"> или Вставьте файл</p>
+        <div v-if="!state.drag" class="drag-area-info__inner">
+          <p class="drag-area-info__text"> или </p>
+          <Svg v-if="!state.recordingAudioStatus" @click="recordingAudio(true)" view-box="0 0 32 32"
+               class-svg="drag-area-info__svg svg"
+               path="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM12 9l12 7-12 7z"/>
+          <Svg v-if="state.recordingAudioStatus" @click="recordingAudio(false)" view-box="0 0 32 32"
+               class-svg="drag-area-info__svg svg"
+               path="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM10 10h4v12h-4zM18 10h4v12h-4z"/>
+        </div>
+
         <p v-else class="drag-area-info__text">Отпустите файл</p>
       </div>
     </div>
@@ -47,24 +57,28 @@
       :url="state.dataInfo.url"
       class-name="modal__inner audio-wrapper"
       type-result="audio"
-      v-else-if="state.sendDataInfo.type === 'audio/mpeg' || state.sendDataInfo.type === 'audio/ogg'"
+      v-else-if="state.sendDataInfo.type === 'audio/mpeg' || state.sendDataInfo.type === 'audio/ogg' || state.sendDataInfo.type === 'audio/webm'"
   />
 </template>
 
 <script>
-import {reactive, watchEffect} from "vue";
+import {reactive, watchEffect, watch} from "vue";
 import {getStorage, ref, uploadBytesResumable, getDownloadURL} from "firebase/storage";
 import {useRemoveData} from "../../hooks/useRemoveData";
 import DragAndDropResult from "../DragAndDropResult/DragAndDropResult";
+import Svg from "../../UI/Svg";
 
 export default {
-  components: {DragAndDropResult},
+  components: {Svg, DragAndDropResult},
   setup(props, {emit}) {
     const storage = getStorage();
 
     const state = reactive({
+      stopRecording: false,
+      itemsRecorder: [],
       drag: false,
       cancel: false,
+      recordingAudioStatus: false,
       sendDataInfo: {},
       uploadStatus: false,
       activeUpload: false,
@@ -77,7 +91,8 @@ export default {
         'video/x-matroska',
         'audio/mpeg',
         'image/webp',
-        'audio/ogg'
+        'audio/ogg',
+        'audio/webm',
       ],
       dataInfo: {
         url: '',
@@ -87,16 +102,23 @@ export default {
 
     let upload;
 
-    const sendDataToStorage = (value) => {
+    const sendDataToStorage = (value, isBlob) => {
+      if (isBlob) {
+        emit('activeUpload', true, 'audio/webm')
+      }
+      state.activeUpload = true
+      state.loadingStatus = true
       const elementRef = ref(storage, `${JSON.parse(localStorage.getItem('userData')).user.uid}/${state.sendDataInfo.name}`);
       const file = value;
+      console.log('filesend', file)
 
-      if (Object.values(state.validType).includes(file.type)) {
+      console.log('elemRef', elementRef)
+      console.log('state.sendDataInfo.name', state.sendDataInfo.name)
+
+      if (Object.values(state.validType).includes(file.type) || isBlob) {
         emit('removeElementRef', elementRef)
         upload = uploadBytesResumable(elementRef, file)
         watchEffect(() => {
-          console.log('change', state.cancel)
-          console.log('state', state)
           if (state.cancel) {
             console.log(upload.cancel());
             state.cancel = false
@@ -128,7 +150,7 @@ export default {
         state.activeUpload = false
         state.uploadStatus = false
         state.loadingStatus = false
-        console.log('errorType', file.type)
+        console.log('errorType', file)
       }
     }
     const deleteData = () => {
@@ -141,8 +163,6 @@ export default {
       }
     }
     const dropData = (event, wasActiveInput) => {
-      state.activeUpload = true
-      state.loadingStatus = true
       let file;
       if (wasActiveInput) {
         deleteData()
@@ -159,15 +179,60 @@ export default {
       state.drag = false
 
     }
-
-    const cancelSendData = () => {
-      // state.cancel = true
-      console.log(upload.cancel());
-      state.loadingStatus = false
+    const recordingAudio = (active) => {
+      if (active) {
+        emit('activeUpload', true, state.sendDataInfo.type)
+        state.stopRecording = false   //
+      }
+      state.recordingAudioStatus = !state.recordingAudioStatus
+      if (!Array.isArray(state.itemsRecorder)) {
+        state.itemsRecorder = []
+      }
+      const device = navigator.mediaDevices.getUserMedia({audio: true})
+      let items = [];
+      device.then(stream => {
+        const recorder = new MediaRecorder(stream)
+        if (recorder.state !== 'recorder') {
+          recorder.ondataavailable = e => {
+            if (!state.stopRecording) {
+              items.push(e.data)
+              if (Array.isArray(state.itemsRecorder)) {
+                state.itemsRecorder = items
+              }
+            } else {
+              recorder.stop()
+              items = []
+            }
+          }
+        }
+        if (active) {
+          recorder.start(10)
+        } else {
+          try {
+            if (!state.recordingAudioStatus) {
+              state.recordingAudioStatus = false
+              state.stopRecording = true
+              const blob = new Blob(state.itemsRecorder, {type: 'audio/webm'})
+              state.sendDataInfo.name = recorder.stream.id
+              state.sendDataInfo.type = 'audio/webm'
+              state.itemsRecorder = null
+              if (blob) {
+                sendDataToStorage(blob, true)
+              }
+            }
+          } catch (err) {
+            console.log(err)
+          }
+        }
+      })
     }
-
+    const cancelSendData = () => {
+      upload.cancel();
+      state.loadingStatus = false,
+          emit('activeUpload', false, state.sendDataInfo.type)
+    }
     return {
-      state, dropData, deleteData, cancelSendData
+      state, dropData, deleteData, cancelSendData, recordingAudio
     }
   }
 }

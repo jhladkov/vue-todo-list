@@ -1,0 +1,31 @@
+.window{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  animation: 1s appearance;
+  background: white;
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+  z-index: 13;
+  border-radius: 20px;
+  .window__inner{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    .window__close{
+      cursor: pointer;
+    }
+  }
+  .window__content{
+    .window__form{
+      display: flex;
+      flex-direction: column;
+      input{
+        margin-bottom: 20px;
+      }
+    }
+  }
+}

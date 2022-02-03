@@ -1,5 +1,6 @@
 
 .modal {
+  border-radius: 20px;
   animation: 1s appearance;
   text-align: center;
   background: white;
@@ -12,7 +13,7 @@
   transform: translate(-50%, -50%);
   top: 50%;
   left: 50%;
-  z-index: 2;
+  z-index: 999999999;
   transition: all .3s;
 
   .modal__header {
@@ -29,8 +30,14 @@
 
   .modal__form {
     margin-top: 20px;
-    flex-direction: column;
-    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+
+    .form__inner{
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
 
     .form__error {
       margin-bottom: 10px;
@@ -52,7 +59,7 @@
       flex-direction: column;
       align-items: center;
       height: 100%;
-      max-height: 400px;
+      max-height: 350px;
 
       //img{
       //  max-height: 300px;
@@ -68,6 +75,8 @@
 
       .drag-area-info {
         display: flex;
+        flex-wrap: wrap;
+        max-width: 400px;
         align-items: baseline;
         justify-content: center;
         width: 100%;
@@ -76,6 +85,21 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        .drag-area-info__inner{
+          align-items: center;
+          margin-top: 20px;
+          display: flex;
+          .drag-area-info__text{
+            margin-right: 10px;
+          }
+        }
+        .drag-area-info__svg{
+          max-width: 70px;
+          transition: all .3s;
+          &:hover{
+            fill: #73d7aa;
+          }
+        }
       }
     }
   }

@@ -7,18 +7,22 @@
       </div>
       <DragAndDrop @getUrlImg="getImg" @activeUpload="activeUpload" @removeElementRef="setElementRef"/>
       <Form @submit.prevent="createTodo" form-class="modal__form form">
-        <Input
-            v-focus
-            @blur="v$.inputText.$touch"
-            v-model.trim="state.inputText"
-            :input-class="v$.$error ? 'form__input input error-message' : 'form__input input' "
+        <div class="form__inner">
+          <Input
+              v-focus
+              @blur="v$.inputText.$touch"
+              v-model.trim="state.inputText"
+              :input-class="v$.$error ? 'form__input input error-message' : 'form__input input' "
 
-        />
+          />
+          <Select text="Секция: " @selectedOption="setSection" className="form__select" typeOpen="top" :options="state.options"/>
+        </div>
         <Button
             item-class="form__button button"
             text="Добавить задачу"
             button-type="submit"
         />
+
       </Form>
     </div>
   </Section>
@@ -28,17 +32,18 @@
 <script>
 import {useStore} from "vuex";
 import Form from "./Form/Form";
-import {reactive} from "vue";
+import {reactive, watchEffect} from "vue";
 import useVuelidate from '@vuelidate/core'
 import {required} from '@vuelidate/validators'
 import {useObjectTodo} from "../hooks/useObjectTodo";
 import {useWriteData} from "../hooks/useWriteData";
 import DragAndDrop from "./DragAndDrop/DragAndDrop";
 import {useRemoveData} from "../hooks/useRemoveData";
+import Select from "../UI/Select";
 
 
 export default {
-  components: { DragAndDrop, Form},
+  components: {Select, DragAndDrop, Form},
   props: {
     title: {
       type: String,
@@ -50,6 +55,8 @@ export default {
 
     const state = reactive({
       inputText: '',
+      section: 'Все',
+      options: store.state.sections,
       storageData: {
         url: '',
         type: ''
@@ -76,7 +83,12 @@ export default {
       state.storageData.url = payload
     }
 
-    const activeUpload = (value,typeData) => {
+    const setSection = (value) => {
+      if (value) {
+        state.section = value
+      }
+    }
+    const activeUpload = (value, typeData) => {
       state.storageData.type = typeData
       state.activeUpload = value
     }
@@ -89,9 +101,9 @@ export default {
 
     const createTodo = () => {
       if (!v$.value.$error && !state.activeUpload) {
-        const obj = useObjectTodo('', 'todo', state.inputText, state.storageData.url,state.storageData.type, Math.floor(Math.random() * 1000000))
+        const obj = useObjectTodo(state.section,1, 'todo', state.inputText, state.storageData.url, state.storageData.type, Math.floor(Math.random() * 1000000))
 
-        useWriteData([...store.state.modal.todos, obj])
+        useWriteData('todo',{data: [...store.state.modal.todos, obj] })
 
         store.dispatch('changeTodosArr', [...store.state.modal.todos, obj])
         closeModel(false)
@@ -101,8 +113,13 @@ export default {
         console.log('error', v$.value.$error)
       }
     }
+
+    watchEffect(() => {
+      state.options = store.state.sections
+    })
+
     return {
-      closeModel, state, v$, createTodo, getImg, activeUpload,setElementRef
+      closeModel, state, v$, createTodo, getImg, activeUpload, setElementRef, setSection
     }
   }
 }
