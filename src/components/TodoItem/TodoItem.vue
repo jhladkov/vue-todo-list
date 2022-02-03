@@ -1,6 +1,6 @@
 <template>
 
-  <div class="panel__item item" draggable="true">
+  <div class="panel__item item">
     <div class="item__info info-wrapper">
       <div class="info-wrapper__inner">
         <div class="info-wrapper__img"

@@ -1,20 +1,33 @@
 <template>
-  <Section :section-class="`section panel ${typePanel}`">
+  <Section @drop.prevent="dragEvent('','drop')" @dragover.prevent
+           :section-class="`section panel ${typePanel}`">
     <div class="section__inner">
       <Title :title="title" :title-class="titleClass"/>
       <slot></slot>
     </div>
     <div class="panel__inner">
       <transition-group name="list">
-        <TodoItem v-if="typePanel === 'todo'" @done="done" @remove="remove" v-for="item in state.todo"
+        <TodoItem @dragleave.prevent="dragEvent(item.id)" draggable="true"
+                  v-if="typePanel === 'todo' && state.todo.length > 0" @done="done" @remove="remove"
+                  v-for="item in state.todo"
                   @selectedOption="rewritePriority"
                   :typeData="item.storageInfo.type" :id="item.id" :value="item.value" :key="item.id"
                   :priority="item.priority"
                   :url="item.storageInfo.url"/>
-        <TodoItem v-else @done="done" v-for="item in state.done" :id="item.id" :typeData="item.storageInfo.type"
+        <TodoItem @dragleave.prevent="dragEvent(item.id)" draggable="true" v-else-if="typePanel === 'done' && state.done.length > 0" @done="done"
+                  v-for="item in state.done"
+                  :id="item.id" :typeData="item.storageInfo.type"
                   :value="item.value" :key="item.id"
                   :url="item.storageInfo.url" @remove="remove"/>
+
       </transition-group>
+      <div v-if="typePanel === 'todo' && state.todo.length === 0 && state.isLoaded" class="panel__no-task todo">
+        <p> Нету дел</p>
+        <img src="../../../public/gif/crying-emoji-9.gif" alt="">
+      </div>
+      <div v-else-if="typePanel === 'done' && state.done.length === 0 && state.isLoaded" class="panel__no-task done">
+        <p> Нету выполненных дел</p>
+      </div>
     </div>
   </Section>
 </template>
@@ -43,15 +56,18 @@ export default {
     },
     titleClass: {
       type: String
-    }
+    },
+    draggableItem: Number,
+    parentDragItem: String,
   },
-  setup(props) {
+  setup(props, {emit}) {
     const store = useStore()
     const storage = getStorage();
 
     const state = reactive({
       todo: store?.state?.modal?.todos,
-      done: store?.state?.modal?.todos.filter(item => item.type === 'done')
+      done: store?.state?.modal?.todos.filter(item => item.type === 'done'),
+      isLoaded: store.state.isLoaded
     })
 
     if (props.typePanel === 'done') {
@@ -77,6 +93,30 @@ export default {
       useWriteData('todo', {data: arr})
     }
 
+    const dragEvent = (value, type) => {
+      if (type === 'drop') {
+        if (props.draggableItem && props.parentDragItem !== props.typePanel) {
+          const changedArr = store?.state?.modal?.todos.map(item => {
+            if (item.id === props.draggableItem) {
+              if (item.type === 'todo') {
+                item.type = 'done'
+              } else {
+                item.type = 'todo'
+              }
+            }
+            return item
+          })
+          store.dispatch('changeTodosArr', changedArr)
+          useWriteData('todo', {data: changedArr})
+        }
+
+        emit('setDragInfo', 0, '')
+      } else {
+        if (!props.draggableItem && !props.parentDragItem) {
+          emit('setDragInfo', value, props.typePanel)
+        }
+      }
+    }
 
     const rewritePriority = (value, id) => {
       store?.state?.modal?.todos.map(item => {
@@ -100,11 +140,12 @@ export default {
       useWriteData('todo', {data: store.state.modal.todos})
     }
 
-    const comparePriority = (a,b) => {
+    const comparePriority = (a, b) => {
       return b.priority - a.priority
     }
 
     watchEffect(() => {
+      state.isLoaded = store.state.isLoaded
       if (store.state.modal.todos) {
         state.todo = store?.state?.modal?.todos.filter(item => item.type === 'todo')
       }
@@ -122,7 +163,7 @@ export default {
     })
 
     return {
-      state, remove, done, rewritePriority
+      state, remove, done, rewritePriority, dragEvent
     }
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <Panel title="Дела" title-class="panel-todo__title title" typePanel="todo">
+  <Panel :parent-drag-item="state.dragInfo.typePanel" :draggable-item="state.dragInfo.id" @setDragInfo="setDragInfo" title="Дела" title-class="panel-todo__title title" typePanel="todo">
     <Select
         @selectedOption="test"
         default-selected-value="По приоритету"
@@ -9,7 +9,7 @@
         :options="state.options"
         text="Фильтровать: "/>
   </Panel>
-  <Panel title="Выполненные" title-class="panel-done__title title" typePanel="done"/>
+  <Panel :parent-drag-item="state.dragInfo.typePanel" :draggable-item="state.dragInfo.id" @setDragInfo="setDragInfo" title="Выполненные" title-class="panel-done__title title" typePanel="done"/>
 </template>
 
 <script>
@@ -29,6 +29,11 @@ export default {
       options: [
           {id: Math.floor(Math.random() * 1000000), value: 'По приоритету'},
       ],
+      dragInfo: {
+        typePanel: '',
+        drag: false,
+        id: 0,
+      }
     })
     const dbRef = ref(getDatabase());
 
@@ -50,7 +55,6 @@ export default {
 
       });
     }
-
     const getDataSection = (path = '') => {
       get(child(dbRef, `${JSON.parse(localStorage.getItem('userData')).user.uid}/${path}`)).then((snapshot) => {
         store.dispatch('changeLoadingStatus', true)
@@ -70,6 +74,11 @@ export default {
       });
     }
 
+    const setDragInfo = (id,type) => {
+      state.dragInfo.id = id
+      state.dragInfo.typePanel = type
+    }
+
     onMounted(() => {
       getDataTodo('todo')
       getDataSection('sections')
@@ -80,7 +89,7 @@ export default {
     }
 
     return{
-      state,test
+      state,test,setDragInfo
     }
 
   }

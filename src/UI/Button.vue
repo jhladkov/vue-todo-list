@@ -1,5 +1,5 @@
 <template>
-  <button :type="buttonType" :class="itemClass">{{text}}</button>
+  <button :type="buttonType" :class="itemClass" >{{text}}</button>
 </template>
 
 <script>

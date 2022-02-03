@@ -179,8 +179,6 @@ export default {
       state.drag = false
 
     }
-
-
     const recordingAudio = (active) => {
       if (active) {
         emit('activeUpload', true, state.sendDataInfo.type)

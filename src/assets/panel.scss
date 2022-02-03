@@ -3,6 +3,23 @@
     margin-bottom: 20px;
   }
 
+  .panel__no-task{
+    margin-bottom: 50px;
+  }
+  .done{
+    margin-bottom: 0;
+  }
+  .todo{
+    display: flex;
+    align-items: center;
+    p{
+      margin-right: 20px;
+    }
+    img{
+      max-width: 70px;
+    }
+  }
+
   .panel__inner {
     padding-top: 20px;
     border-top: 1px solid darkgray;
@@ -17,6 +34,8 @@
 
       .info-wrapper__inner{
         margin-bottom: 20px;
+        word-break: break-word;
+        max-width: 500px;
       }
 
       .info-wrapper__img{
