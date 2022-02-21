@@ -11,58 +11,20 @@ export default createStore({
         sections: [{id: Math.floor(Math.random() * 1000000), value: 'Все', notDelete: true}],
         isLoaded: false,
         selectedOption: 'Все',
-        // testArr: [
-        //     {
-        //         name: 'Sergo',
-        //         id: 12,
-        //         sectionName: 'All',
-        //         priority: 4,
-        //         value: 'dsfdsf',
-        //         type: 'todo',
-        //     },
-        //     {
-        //         name: 'Sergo',
-        //         id: 13,
-        //         sectionName: 'one',
-        //         priority: 4,
-        //         value: 'dsfdsf',
-        //         type: 'todo',
-        //     },
-        //     {
-        //         name: 'Sergo',
-        //         id: 14,
-        //         sectionName: 'two',
-        //         priority: 4,
-        //         value: 'dsfdsf',
-        //         type: 'todo',
-        //     },
-        //     {
-        //         name: 'Sergo',
-        //         id: 15,
-        //         sectionName: 'two',
-        //         priority: 4,
-        //         value: 'dsfdsf',
-        //         type: 'todo',
-        //     },
-        // ]
     },
     getters: {
 
-        // getSections(state) {
-        //     return state.testArr.map(item => ({
-        //         id: item.id,
-        //         value: item.sectionName,
-        //     }))
+        // getTestValue(state) {
+        //     return (id) => {
+        //         return id
+        //     }
         // },
-        // getAllTodo(state) {
-        //     return state.testArr
-        // },
-        // getActiveSection(state) {
-        //     return state.selectedOption
-        // }
 
         getFilterTodosByDone(state) {
-           return state.todos.filter(item => item.type === 'done')
+           return state.modal.todos.filter(item => item.type === 'done')
+        },
+        getFilterTodosByTodo(state) {
+            return state.modal.todos.filter(item => item.type === 'todo')
         }
 
     },

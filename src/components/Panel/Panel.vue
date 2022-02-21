@@ -2,7 +2,7 @@
   <Section
       @drop.prevent="dragEvent('','drop')"
       @dragover.prevent
-      :section-class="`section panel ${typePanel}`">
+      :section-class="['panel', typePanel]">
 
     <div class="section__inner">
       <Title
@@ -16,10 +16,10 @@
         <TodoItem
             @dragleave.prevent="dragEvent(item.id)"
             draggable="true"
-            v-if="typePanel === 'todo' && filteredTodo.length > 0"
+            v-if="typePanel === 'todo' && state.todo.length > 0"
             @done="done"
             @remove="remove"
-            v-for="item in filteredTodo"
+            v-for="item in state.todo"
             @selectedOption="rewritePriority"
             :typeData="item.type"
             :id="item.id"
@@ -96,26 +96,22 @@ export default {
     const storage = getStorage();
 
     const state = reactive({
-      todo: store?.state.modal.todos,
-      done: store?.state?.modal?.todos.filter(item => item.type === 'done'),
+      todo: store.getters.getFilterTodosByTodo,
+      done: store.getters.getFilterTodosByDone,
+      allTodos: store?.state.modal.todos,
       isLoaded: store.state.isLoaded
     })
 
-    const filteredTodo = computed(() => {
-      if (store.state.selectedOption === 'Все') {
-        return state.todo
-      }
-      return state.todo.filter(item => item.sectionName === store.state.selectedOption)
-    })
-
-    if (props.typePanel === 'done') {
-      console.log(state.todo.filter(item => item.type === 'done'))
-      state.todo = state.todo.filter(item => item.type === 'done')
-    }
-
+    // const filteredTodo = computed(() => {
+    //   if (store.state.selectedOption === 'Все') {
+    //     return state.allTodos
+    //   }
+    //   return state.allTodos.filter(item => item.sectionName === store.state.selectedOption)
+    // })
 
     const done = (id, img, index = null) => {
-      const arr = store?.state?.modal?.todos
+      const arr = state.allTodos
+
       arr.forEach((item, elemIndex) => {
         if (item.id === id) {
           index = elemIndex
@@ -128,13 +124,17 @@ export default {
       }
       console.log(arr)
       store.dispatch('changeTodosArr', arr)
-      useWriteData('todo', {data: arr})
+      // useWriteData('todo', {data: arr})
+      store.dispatch('writeDataInDatabase', {
+        path: 'todo',
+        value: {data: arr}
+      })
     }
 
     const dragEvent = (value, type) => {
       if (type === 'drop') {
         if (props.draggableItem && props.parentDragItem !== props.typePanel) {
-          const changedArr = store?.state?.modal?.todos.map(item => {
+          const changedArr = state.allTodos.map(item => {
             if (item.id === props.draggableItem) {
               if (item.type === 'todo') {
                 item.type = 'done'
@@ -145,7 +145,11 @@ export default {
             return item
           })
           store.dispatch('changeTodosArr', changedArr)
-          useWriteData('todo', {data: changedArr})
+          // useWriteData('todo', {data: changedArr})
+          store.dispatch('writeDataInDatabase', {
+            path: 'todo',
+            value: {data: changedArr}
+          })
         }
 
         emit('setDragInfo', 0, '')
@@ -157,25 +161,34 @@ export default {
     }
 
     const rewritePriority = (value, id) => {
-      store?.state?.modal?.todos.map(item => {
+      state.allTodos.map(item => {
         if (item.id === id) {
           item.priority = value
         }
       })
-      store.dispatch('changeTodosArr', store.state.modal.todos)
-      useWriteData('todo', {data: store.state.modal.todos})
+      store.dispatch('changeTodosArr', state.allTodos)
+      // useWriteData('todo', {data: store.state.modal.todos})
+      store.dispatch('writeDataInDatabase', {
+        path: 'todo',
+        value: {data: state.allTodos}
+      })
     }
 
     const remove = (id, deleteData) => {
       if (deleteData) {
         const elementRef = ref(storage, deleteData);
-        useRemoveData(elementRef)
+        // useRemoveData(elementRef)
+        store.dispatch('removeDataFromDatabase', elementRef)
       }
 
-      const filterTodos = store.state.modal.todos.filter(item => item.id !== id)
+      const filterTodos = state.allTodos.filter(item => item.id !== id)
       console.log(filterTodos)
       store.dispatch('changeTodo', filterTodos)
-      useWriteData('todo', {data: store.state.modal.todos})
+      // useWriteData('todo', {data: store.state.modal.todos})
+      store.dispatch('writeDataInDatabase', {
+        path: 'todo',
+        value: {data: filterTodos}
+      })
     }
 
     const comparePriority = (a, b) => {
@@ -183,13 +196,18 @@ export default {
     }
 
     watchEffect(() => {
+
+      state.allTodos = store?.state.modal.todos
+
       state.isLoaded = store.state.isLoaded
-      if (store.state.modal.todos) {
-        state.todo = store?.state?.modal?.todos.filter(item => item.type === 'todo')
+      if (state.allTodos) {
+        state.todo = store.getters.getFilterTodosByTodo
+        state.done = store.getters.getFilterTodosByDone
       }
       if (store.state.selectedOption) {
-        const filterTodo = state.todo = store?.state?.modal?.todos.filter(item => item.type === 'todo').sort(comparePriority)
-        const filterDone = state.done = store?.state?.modal?.todos.filter(item => item.type === 'done')
+        const filterTodo = store.getters.getFilterTodosByTodo.sort(comparePriority)
+        const filterDone = store.getters.getFilterTodosByDone
+
         if (store.state.selectedOption !== 'Все') {
           state.todo = filterTodo.filter(item => item.section === store.state.selectedOption)
           state.done = filterDone.filter(item => item.section === store.state.selectedOption)
@@ -201,7 +219,7 @@ export default {
     })
 
     return {
-      state, remove, done, rewritePriority, dragEvent, filteredTodo
+      state, remove, done, rewritePriority, dragEvent
     }
   }
 }

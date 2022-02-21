@@ -1,5 +1,8 @@
 <template>
-  <section :class="sectionClass">
+  <section
+      :class="sectionClass"
+      class="section"
+  >
     <slot></slot>
   </section>
 </template>
@@ -9,8 +12,7 @@ export default {
   name: 'Section',
   props:{
     sectionClass: {
-      type: String,
-      default: 'section'
+      type: String
     }
   }
 }
