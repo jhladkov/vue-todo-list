@@ -1,31 +1,62 @@
 <template>
-  <Section @drop.prevent="dragEvent('','drop')" @dragover.prevent
-           :section-class="`section panel ${typePanel}`">
+  <Section
+      @drop.prevent="dragEvent('','drop')"
+      @dragover.prevent
+      :section-class="`section panel ${typePanel}`">
+
     <div class="section__inner">
-      <Title :title="title" :title-class="titleClass"/>
+      <Title
+          :title="title"
+          :title-class="titleClass"
+      />
       <slot></slot>
     </div>
     <div class="panel__inner">
       <transition-group name="list">
-        <TodoItem @dragleave.prevent="dragEvent(item.id)" draggable="true"
-                  v-if="typePanel === 'todo' && state.todo.length > 0" @done="done" @remove="remove"
-                  v-for="item in state.todo"
-                  @selectedOption="rewritePriority"
-                  :typeData="item.storageInfo.type" :id="item.id" :value="item.value" :key="item.id"
-                  :priority="item.priority"
-                  :url="item.storageInfo.url"/>
-        <TodoItem @dragleave.prevent="dragEvent(item.id)" draggable="true" v-else-if="typePanel === 'done' && state.done.length > 0" @done="done"
-                  v-for="item in state.done"
-                  :id="item.id" :typeData="item.storageInfo.type"
-                  :value="item.value" :key="item.id"
-                  :url="item.storageInfo.url" @remove="remove"/>
+        <TodoItem
+            @dragleave.prevent="dragEvent(item.id)"
+            draggable="true"
+            v-if="typePanel === 'todo' && filteredTodo.length > 0"
+            @done="done"
+            @remove="remove"
+            v-for="item in filteredTodo"
+            @selectedOption="rewritePriority"
+            :typeData="item.type"
+            :id="item.id"
+            :value="item.value"
+            :key="item.id"
+            :priority="item.priority"
+            :url="item.storageInfo.url"
+        />
+        <TodoItem
+            @dragleave.prevent="dragEvent(item.id)"
+            draggable="true"
+            v-else-if="typePanel === 'done' && state.done.length > 0"
+            @done="done"
+            v-for="item in state.done"
+            :id="item.id"
+            :typeData="item.storageInfo.type"
+            :value="item.value"
+            :key="item.id"
+            :url="item.storageInfo.url"
+            @remove="remove"
+        />
 
       </transition-group>
-      <div v-if="typePanel === 'todo' && state.todo.length === 0 && state.isLoaded" class="panel__no-task todo">
+      <div
+          v-if="typePanel === 'todo'
+          && state.todo.length === 0
+          && state.isLoaded"
+          class="panel__no-task todo"
+      >
         <p> Нету дел</p>
         <img src="../../../public/gif/crying-emoji-9.gif" alt="">
       </div>
-      <div v-else-if="typePanel === 'done' && state.done.length === 0 && state.isLoaded" class="panel__no-task done">
+      <div
+          v-else-if="typePanel === 'done'
+          && state.done.length === 0
+          && state.isLoaded"
+          class="panel__no-task done">
         <p> Нету выполненных дел</p>
       </div>
     </div>
@@ -35,7 +66,7 @@
 <script>
 
 
-import {reactive, watchEffect} from "vue";
+import {computed, reactive, watchEffect} from "vue";
 import {useStore} from "vuex";
 import TodoItem from "../TodoItem/TodoItem";
 import {useWriteData} from "../../hooks/useWriteData";
@@ -65,9 +96,16 @@ export default {
     const storage = getStorage();
 
     const state = reactive({
-      todo: store?.state?.modal?.todos,
+      todo: store?.state.modal.todos,
       done: store?.state?.modal?.todos.filter(item => item.type === 'done'),
       isLoaded: store.state.isLoaded
+    })
+
+    const filteredTodo = computed(() => {
+      if (store.state.selectedOption === 'Все') {
+        return state.todo
+      }
+      return state.todo.filter(item => item.sectionName === store.state.selectedOption)
     })
 
     if (props.typePanel === 'done') {
@@ -163,7 +201,7 @@ export default {
     })
 
     return {
-      state, remove, done, rewritePriority, dragEvent
+      state, remove, done, rewritePriority, dragEvent, filteredTodo
     }
   }
 }

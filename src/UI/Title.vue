@@ -1,5 +1,8 @@
 <template>
-  <h2 :class="titleClass">{{title}}</h2>
+  <h2
+      :class="titleClass"
+      class="title"
+  >{{title}}</h2>
 </template>
 
 <script>
@@ -9,7 +12,6 @@ export default {
     title:String,
     titleClass: {
       type:String,
-      default: 'title'
     }
   }
 }

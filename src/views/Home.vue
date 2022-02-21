@@ -1,5 +1,12 @@
 <template>
-  <Panel :parent-drag-item="state.dragInfo.typePanel" :draggable-item="state.dragInfo.id" @setDragInfo="setDragInfo" title="Дела" title-class="panel-todo__title title" typePanel="todo">
+  <Panel
+      :parent-drag-item="state.dragInfo.typePanel"
+      :draggable-item="state.dragInfo.id"
+      @setDragInfo="setDragInfo"
+      title="Дела"
+      title-class="panel-todo__title"
+      typePanel="todo"
+  >
     <Select
         @selectedOption="test"
         default-selected-value="По приоритету"
@@ -7,9 +14,17 @@
         type-open="bottom"
         class-name="panel-todo__filter-select"
         :options="state.options"
-        text="Фильтровать: "/>
+        text="Фильтровать: "
+    />
   </Panel>
-  <Panel :parent-drag-item="state.dragInfo.typePanel" :draggable-item="state.dragInfo.id" @setDragInfo="setDragInfo" title="Выполненные" title-class="panel-done__title title" typePanel="done"/>
+  <Panel
+      :parent-drag-item="state.dragInfo.typePanel"
+      :draggable-item="state.dragInfo.id"
+      @setDragInfo="setDragInfo"
+      title="Выполненные"
+      title-class="panel-done__title"
+      typePanel="done"
+  />
 </template>
 
 <script>
@@ -27,7 +42,7 @@ export default {
     const store = useStore()
     const state = reactive({
       options: [
-          {id: Math.floor(Math.random() * 1000000), value: 'По приоритету'},
+        {id: Math.floor(Math.random() * 1000000), value: 'По приоритету'},
       ],
       dragInfo: {
         typePanel: '',
@@ -37,24 +52,7 @@ export default {
     })
     const dbRef = ref(getDatabase());
 
-    const getDataTodo = (path = '') => {
-      get(child(dbRef, `${JSON.parse(localStorage.getItem('userData')).user.uid}/${path}`)).then((snapshot) => {
-        store.dispatch('changeLoadingStatus', true)
 
-        if (snapshot.exists()) {
-          const data = snapshot.val().data
-          if (data) {
-            store.dispatch('changeTodosArr', data)
-          }
-        } else {
-          console.log("No data available");
-        }
-      }).catch((error) => {
-        console.error(error);
-        getDataTodo()
-
-      });
-    }
     const getDataSection = (path = '') => {
       get(child(dbRef, `${JSON.parse(localStorage.getItem('userData')).user.uid}/${path}`)).then((snapshot) => {
         store.dispatch('changeLoadingStatus', true)
@@ -65,7 +63,7 @@ export default {
             store.dispatch('changeSection', data)
           }
         } else {
-          store.dispatch('changeSection', [{id: Math.floor(Math.random() * 1000000), value: 'Все',notDelete: true}])
+          store.dispatch('changeSection', [{id: Math.floor(Math.random() * 1000000), value: 'Все', notDelete: true}])
           console.log("No data available");
         }
       }).catch((error) => {
@@ -74,13 +72,12 @@ export default {
       });
     }
 
-    const setDragInfo = (id,type) => {
+    const setDragInfo = (id, type) => {
       state.dragInfo.id = id
       state.dragInfo.typePanel = type
     }
 
     onMounted(() => {
-      getDataTodo('todo')
       getDataSection('sections')
     })
 
@@ -88,8 +85,8 @@ export default {
       console.log('sortBy', value)
     }
 
-    return{
-      state,test,setDragInfo
+    return {
+      state, test, setDragInfo
     }
 
   }
