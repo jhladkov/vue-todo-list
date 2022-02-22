@@ -83,9 +83,8 @@ export default {
           path: 'todo',
           uid: state.uid,
         })
-      }catch (err) {
+      } catch (err) {
         console.log(err)
-        getDataTodo()
       }
     }
 
@@ -95,9 +94,8 @@ export default {
           path: 'sections',
           uid: state.uid
         })
-      }catch (err) {
+      } catch (err) {
         console.log(err)
-        getDataSection()
       }
     }
 

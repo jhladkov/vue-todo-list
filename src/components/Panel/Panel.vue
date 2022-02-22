@@ -2,7 +2,8 @@
   <Section
       @drop.prevent="dragEvent('','drop')"
       @dragover.prevent
-      :section-class="['panel', typePanel]">
+      :section-class="['panel', typePanel]"
+  >
 
     <div class="section__inner">
       <Title
@@ -66,12 +67,10 @@
 <script>
 
 
-import {computed, reactive, watchEffect} from "vue";
+import {reactive, watchEffect} from "vue";
 import {useStore} from "vuex";
 import TodoItem from "../TodoItem/TodoItem";
-import {useWriteData} from "../../hooks/useWriteData";
 import {getStorage, ref} from "firebase/storage";
-import {useRemoveData} from "../../hooks/useRemoveData";
 import Section from "../../hooc/Section";
 
 export default {
@@ -102,12 +101,6 @@ export default {
       isLoaded: store.state.isLoaded
     })
 
-    // const filteredTodo = computed(() => {
-    //   if (store.state.selectedOption === 'Все') {
-    //     return state.allTodos
-    //   }
-    //   return state.allTodos.filter(item => item.sectionName === store.state.selectedOption)
-    // })
 
     const done = (id, img, index = null) => {
       const arr = state.allTodos
@@ -124,7 +117,6 @@ export default {
       }
       console.log(arr)
       store.dispatch('changeTodosArr', arr)
-      // useWriteData('todo', {data: arr})
       store.dispatch('writeDataInDatabase', {
         path: 'todo',
         value: {data: arr}
@@ -145,7 +137,6 @@ export default {
             return item
           })
           store.dispatch('changeTodosArr', changedArr)
-          // useWriteData('todo', {data: changedArr})
           store.dispatch('writeDataInDatabase', {
             path: 'todo',
             value: {data: changedArr}
@@ -177,22 +168,15 @@ export default {
     const remove = (id, deleteData) => {
       if (deleteData) {
         const elementRef = ref(storage, deleteData);
-        // useRemoveData(elementRef)
         store.dispatch('removeDataFromDatabase', elementRef)
       }
-
       const filterTodos = state.allTodos.filter(item => item.id !== id)
       console.log(filterTodos)
       store.dispatch('changeTodo', filterTodos)
-      // useWriteData('todo', {data: store.state.modal.todos})
       store.dispatch('writeDataInDatabase', {
         path: 'todo',
         value: {data: filterTodos}
       })
-    }
-
-    const comparePriority = (a, b) => {
-      return b.priority - a.priority
     }
 
     watchEffect(() => {
@@ -205,12 +189,12 @@ export default {
         state.done = store.getters.getFilterTodosByDone
       }
       if (store.state.selectedOption) {
-        const filterTodo = store.getters.getFilterTodosByTodo.sort(comparePriority)
+        const filterTodo = store.getters.getFilterTodosBySortPriority
         const filterDone = store.getters.getFilterTodosByDone
 
         if (store.state.selectedOption !== 'Все') {
-          state.todo = filterTodo.filter(item => item.section === store.state.selectedOption)
-          state.done = filterDone.filter(item => item.section === store.state.selectedOption)
+          state.todo = store.getters.getTodosBySelectedOption(filterTodo)
+          state.done = store.getters.getTodosBySelectedOption(filterDone)
         } else {
           state.todo = filterTodo
           state.done = filterDone

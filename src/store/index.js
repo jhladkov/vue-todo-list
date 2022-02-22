@@ -14,18 +14,24 @@ export default createStore({
     },
     getters: {
 
-        // getTestValue(state) {
-        //     return (id) => {
-        //         return id
-        //     }
-        // },
 
         getFilterTodosByDone(state) {
-           return state.modal.todos.filter(item => item.type === 'done')
+            return state.modal.todos.filter(item => item.type === 'done')
         },
         getFilterTodosByTodo(state) {
             return state.modal.todos.filter(item => item.type === 'todo')
-        }
+        },
+        getFilterTodosBySortPriority(state) {
+            const comparePriority = (a, b) => {
+                return b.priority - a.priority
+            }
+            return state.modal.todos.filter(item => item.type === 'todo').sort(comparePriority)
+        },
+        getTodosBySelectedOption(state) {
+            return (value) => {
+                return value.filter(item => item.section === state.selectedOption)
+            }
+        },
 
     },
     mutations: {
@@ -60,36 +66,55 @@ export default createStore({
     actions: {
         getTodoFromDatabase({commit}, payload) {
             const dbRef = ref(getDatabase());
-            get(child(dbRef, `${payload.uid}/${payload.path}`))
-                .then((snapshot) => {
+            const interval = setInterval(() => {
+                console.log(payload)
+                console.log('request again')
+                callRequest()
+            },5000)
+            const callRequest = () => {
+                get(child(dbRef, `${payload.uid}/${payload.path}`))
+                    .then((snapshot) => {
+                        commit('setLoading', true)
+
+                        if (snapshot.exists()) {
+                            const data = snapshot.val().data
+                            if (data) {
+                                commit('setTodos', data)
+                            }
+                        } else {
+                            console.log("No data available");
+                        }
+                        clearInterval(interval)
+                    })
+            }
+
+
+        },
+
+        getSectionFromDatabase({commit}, payload) {
+            const dbRef = ref(getDatabase());
+
+            const interval = setInterval(() => {
+                console.log(payload)
+                console.log('request again')
+                callRequest()
+            },5000)
+            const callRequest = () => {
+                get(child(dbRef, `${payload.uid}/${payload.path}`)).then((snapshot) => {
                     commit('setLoading', true)
 
                     if (snapshot.exists()) {
                         const data = snapshot.val().data
                         if (data) {
-                            commit('setTodos', data)
+                            commit('setSections', data)
                         }
                     } else {
+                        commit('setSections', [{id: Math.floor(Math.random() * 1000000), value: 'Все', notDelete: true}])
                         console.log("No data available");
                     }
+                    clearInterval(interval)
                 })
-        },
-
-        getSectionFromDatabase({commit}, payload) {
-            const dbRef = ref(getDatabase());
-            get(child(dbRef, `${payload.uid}/${payload.path}`)).then((snapshot) => {
-                commit('setLoading', true)
-
-                if (snapshot.exists()) {
-                    const data = snapshot.val().data
-                    if (data) {
-                        commit('setSections', data)
-                    }
-                } else {
-                    commit('setSections',[{id: Math.floor(Math.random() * 1000000), value: 'Все', notDelete: true}])
-                    console.log("No data available");
-                }
-            })
+            }
         },
 
         writeDataInDatabase({state, commit}, obj) {

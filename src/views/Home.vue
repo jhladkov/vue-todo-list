@@ -39,7 +39,6 @@ import Select from "../UI/Select";
 export default {
   components: {Select, Panel, Section, Button},
   setup() {
-    const store = useStore()
     const state = reactive({
       options: [
         {id: Math.floor(Math.random() * 1000000), value: 'По приоритету'},
@@ -50,36 +49,12 @@ export default {
         id: 0,
       }
     })
-    const dbRef = ref(getDatabase());
-
-
-    const getDataSection = (path = '') => {
-      get(child(dbRef, `${JSON.parse(localStorage.getItem('userData')).user.uid}/${path}`)).then((snapshot) => {
-        store.dispatch('changeLoadingStatus', true)
-
-        if (snapshot.exists()) {
-          const data = snapshot.val().data
-          if (data) {
-            store.dispatch('changeSection', data)
-          }
-        } else {
-          store.dispatch('changeSection', [{id: Math.floor(Math.random() * 1000000), value: 'Все', notDelete: true}])
-          console.log("No data available");
-        }
-      }).catch((error) => {
-        console.error(error);
-        getDataSection()
-      });
-    }
 
     const setDragInfo = (id, type) => {
       state.dragInfo.id = id
       state.dragInfo.typePanel = type
     }
 
-    onMounted(() => {
-      getDataSection('sections')
-    })
 
     const test = (value) => {
       console.log('sortBy', value)
