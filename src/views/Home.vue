@@ -1,39 +1,41 @@
 <template>
-  <Panel
-      :todo="state.todo"
-      :is-loaded="state.isLoaded"
-      :parent-drag-item="state.dragInfo.typePanel"
-      :draggable-item="state.dragInfo.id"
-      @setDragInfo="setDragInfo"
-      @rewritePriority="rewritePriority"
-      @doneTask="done"
-      @changeTypeByDragAndDrop="changeTypeByDragAndDrop"
-      title="Дела"
-      title-class="panel-todo__title"
-      typePanel="todo"
-  >
-    <Select
-        default-selected-value="По приоритету"
-        :possibility-to-delete="false"
-        type-open="bottom"
-        class-name="panel-todo__filter-select"
-        :options="state.options"
-        text="Фильтровать: "
+    <Panel
+        :todo="state.todo"
+        :is-loaded="state.isLoaded"
+        :parent-drag-item="state.dragInfo.typePanel"
+        :draggable-item="state.dragInfo.id"
+        @setDragInfo="setDragInfo"
+        @rewritePriority="rewritePriority"
+        @doneTask="done"
+        @changeTypeByDragAndDrop="changeTypeByDragAndDrop"
+        @remove="remove"
+        title="Дела"
+        title-class="panel-todo__title"
+        typePanel="todo"
+    >
+      <Select
+          default-selected-value="По приоритету"
+          :possibility-to-delete="false"
+          type-open="bottom"
+          class-name="panel-todo__filter-select"
+          :options="state.options"
+          text="Фильтровать: "
+      />
+    </Panel>
+    <Panel
+        :done="state.done"
+        :is-loaded="state.isLoaded"
+        :parent-drag-item="state.dragInfo.typePanel"
+        :draggable-item="state.dragInfo.id"
+        @setDragInfo="setDragInfo"
+        @remove="remove"
+        @rewritePriority="rewritePriority"
+        @doneTask="done"
+        @changeTypeByDragAndDrop="changeTypeByDragAndDrop"
+        title="Выполненные"
+        title-class="panel-done__title"
+        typePanel="done"
     />
-  </Panel>
-  <Panel
-      :done="state.done"
-      :is-loaded="state.isLoaded"
-      :parent-drag-item="state.dragInfo.typePanel"
-      :draggable-item="state.dragInfo.id"
-      @setDragInfo="setDragInfo"
-      @rewritePriority="rewritePriority"
-      @doneTask="done"
-      @changeTypeByDragAndDrop="changeTypeByDragAndDrop"
-      title="Выполненные"
-      title-class="panel-done__title"
-      typePanel="done"
-  />
 </template>
 
 <script>
@@ -42,13 +44,14 @@ import {useStore} from 'vuex'
 import {onMounted, reactive, watchEffect} from "vue";
 import Section from "../hooc/Section";
 import Panel from "../components/Panel/Panel";
-import {getDatabase, ref, get, child} from "firebase/database";
+import {getStorage, ref} from "firebase/storage";
 import Select from "../UI/Select";
 
 export default {
   components: {Select, Panel, Section, Button},
   setup() {
     const store = useStore()
+    const storage = getStorage()
 
     const state = reactive({
       options: [
@@ -85,9 +88,22 @@ export default {
       })
     }
 
+    const remove = (id, deleteData) => {
+      if (deleteData) {
+        const elementRef = ref(storage, deleteData);
+        store.dispatch('removeDataFromDatabase', elementRef)
+      }
+      const filterTodos = state.allTodos.filter(item => item.id !== id)
+      store.dispatch('changeTodo', filterTodos)
+      store.dispatch('writeDataInDatabase', {
+        path: 'todo',
+        value: {data: filterTodos}
+      })
+    }
+
     const changeTypeByDragAndDrop = (value, type, typePanel) => {
       if (type === 'drop') {
-        console.log('drop',value,type,typePanel)
+        console.log('drop', value, type, typePanel)
         if (state.dragInfo.id && state.dragInfo.typePanel !== typePanel) {
           const changedArr = state.allTodos.map(item => {
             if (item.id === state.dragInfo.id) {
@@ -106,10 +122,10 @@ export default {
           })
         }
 
-        setDragInfo(0,'')
+        setDragInfo(0, '')
       } else {
         if (!state.dragInfo.id && !state.dragInfo.typePanel) {
-          setDragInfo(value,typePanel)
+          setDragInfo(value, typePanel)
         }
       }
     }
@@ -157,6 +173,7 @@ export default {
       state,
       setDragInfo,
       done,
+      remove,
       changeTypeByDragAndDrop,
       rewritePriority,
     }

@@ -66,11 +66,7 @@
 
 <script>
 
-
-import {reactive} from "vue";
-import {useStore} from "vuex";
 import TodoItem from "../TodoItem/TodoItem";
-import {getStorage, ref} from "firebase/storage";
 import Section from "../../hooc/Section";
 
 export default {
@@ -94,12 +90,6 @@ export default {
     parentDragItem: String,
   },
   setup(props, {emit}) {
-    const store = useStore()
-    const storage = getStorage();
-
-    const state = reactive({
-
-    })
 
     const doneTask = (id, img, index = null) => {
       emit('doneTask',id,img,index)
@@ -114,42 +104,11 @@ export default {
     }
 
     const remove = (id, deleteData) => {
-      if (deleteData) {
-        const elementRef = ref(storage, deleteData);
-        store.dispatch('removeDataFromDatabase', elementRef)
-      }
-      const filterTodos = state.allTodos.filter(item => item.id !== id)
-      console.log(filterTodos)
-      store.dispatch('changeTodo', filterTodos)
-      store.dispatch('writeDataInDatabase', {
-        path: 'todo',
-        value: {data: filterTodos}
-      })
+      emit('remove',id,deleteData)
     }
 
-    // watchEffect(() => {
-    //   state.allTodos = store?.state.modal.todos
-    //   state.isLoaded = store.state.isLoaded
-    //   if (state.allTodos) {
-    //     state.todo = store.getters.getFilterTodosByTodo
-    //     state.done = store.getters.getFilterTodosByDone
-    //   }
-    //   if (store.state.selectedOption) {
-    //     const filterTodo = store.getters.getFilterTodosBySortPriority
-    //     const filterDone = store.getters.getFilterTodosByDone
-    //
-    //     if (store.state.selectedOption !== 'Все') {
-    //       state.todo = store.getters.getTodosBySelectedOption(filterTodo)
-    //       state.done = store.getters.getTodosBySelectedOption(filterDone)
-    //     } else {
-    //       state.todo = filterTodo
-    //       state.done = filterDone
-    //     }
-    //   }
-    // })
-
     return {
-      state, remove, doneTask, rewritePriority, dragEvent
+       remove, doneTask, rewritePriority, dragEvent
     }
   }
 }
