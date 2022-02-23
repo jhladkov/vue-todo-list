@@ -17,10 +17,10 @@
         <TodoItem
             @dragleave.prevent="dragEvent(item.id)"
             draggable="true"
-            v-if="typePanel === 'todo' && state.todo.length > 0"
-            @done="done"
+            v-if="typePanel === 'todo' && todo.length > 0"
+            @done="doneTask"
             @remove="remove"
-            v-for="item in state.todo"
+            v-for="item in todo"
             @selectedOption="rewritePriority"
             :typeData="item.type"
             :id="item.id"
@@ -32,9 +32,9 @@
         <TodoItem
             @dragleave.prevent="dragEvent(item.id)"
             draggable="true"
-            v-else-if="typePanel === 'done' && state.done.length > 0"
-            @done="done"
-            v-for="item in state.done"
+            v-else-if="typePanel === 'done' && done.length > 0"
+            @done="doneTask"
+            v-for="item in done"
             :id="item.id"
             :typeData="item.storageInfo.type"
             :value="item.value"
@@ -46,8 +46,8 @@
       </transition-group>
       <div
           v-if="typePanel === 'todo'
-          && state.todo.length === 0
-          && state.isLoaded"
+          && todo.length === 0
+          && isLoaded"
           class="panel__no-task todo"
       >
         <p> Нету дел</p>
@@ -55,8 +55,8 @@
       </div>
       <div
           v-else-if="typePanel === 'done'
-          && state.done.length === 0
-          && state.isLoaded"
+          && done.length === 0
+          && isLoaded"
           class="panel__no-task done">
         <p> Нету выполненных дел</p>
       </div>
@@ -67,7 +67,7 @@
 <script>
 
 
-import {reactive, watchEffect} from "vue";
+import {reactive} from "vue";
 import {useStore} from "vuex";
 import TodoItem from "../TodoItem/TodoItem";
 import {getStorage, ref} from "firebase/storage";
@@ -87,6 +87,9 @@ export default {
     titleClass: {
       type: String
     },
+    todo: Array,
+    done: Array,
+    isLoaded: Boolean,
     draggableItem: Number,
     parentDragItem: String,
   },
@@ -95,74 +98,19 @@ export default {
     const storage = getStorage();
 
     const state = reactive({
-      todo: store.getters.getFilterTodosByTodo,
-      done: store.getters.getFilterTodosByDone,
-      allTodos: store?.state.modal.todos,
-      isLoaded: store.state.isLoaded
+
     })
 
-
-    const done = (id, img, index = null) => {
-      const arr = state.allTodos
-
-      arr.forEach((item, elemIndex) => {
-        if (item.id === id) {
-          index = elemIndex
-        }
-      })
-      if (arr[index].type === 'done') {
-        arr[index].type = 'todo'
-      } else {
-        arr[index].type = 'done'
-      }
-      console.log(arr)
-      store.dispatch('changeTodosArr', arr)
-      store.dispatch('writeDataInDatabase', {
-        path: 'todo',
-        value: {data: arr}
-      })
+    const doneTask = (id, img, index = null) => {
+      emit('doneTask',id,img,index)
     }
 
     const dragEvent = (value, type) => {
-      if (type === 'drop') {
-        if (props.draggableItem && props.parentDragItem !== props.typePanel) {
-          const changedArr = state.allTodos.map(item => {
-            if (item.id === props.draggableItem) {
-              if (item.type === 'todo') {
-                item.type = 'done'
-              } else {
-                item.type = 'todo'
-              }
-            }
-            return item
-          })
-          store.dispatch('changeTodosArr', changedArr)
-          store.dispatch('writeDataInDatabase', {
-            path: 'todo',
-            value: {data: changedArr}
-          })
-        }
-
-        emit('setDragInfo', 0, '')
-      } else {
-        if (!props.draggableItem && !props.parentDragItem) {
-          emit('setDragInfo', value, props.typePanel)
-        }
-      }
+     emit('changeTypeByDragAndDrop',value,type, props.typePanel)
     }
 
     const rewritePriority = (value, id) => {
-      state.allTodos.map(item => {
-        if (item.id === id) {
-          item.priority = value
-        }
-      })
-      store.dispatch('changeTodosArr', state.allTodos)
-      // useWriteData('todo', {data: store.state.modal.todos})
-      store.dispatch('writeDataInDatabase', {
-        path: 'todo',
-        value: {data: state.allTodos}
-      })
+      emit('rewritePriority',value,id)
     }
 
     const remove = (id, deleteData) => {
@@ -179,31 +127,29 @@ export default {
       })
     }
 
-    watchEffect(() => {
-
-      state.allTodos = store?.state.modal.todos
-
-      state.isLoaded = store.state.isLoaded
-      if (state.allTodos) {
-        state.todo = store.getters.getFilterTodosByTodo
-        state.done = store.getters.getFilterTodosByDone
-      }
-      if (store.state.selectedOption) {
-        const filterTodo = store.getters.getFilterTodosBySortPriority
-        const filterDone = store.getters.getFilterTodosByDone
-
-        if (store.state.selectedOption !== 'Все') {
-          state.todo = store.getters.getTodosBySelectedOption(filterTodo)
-          state.done = store.getters.getTodosBySelectedOption(filterDone)
-        } else {
-          state.todo = filterTodo
-          state.done = filterDone
-        }
-      }
-    })
+    // watchEffect(() => {
+    //   state.allTodos = store?.state.modal.todos
+    //   state.isLoaded = store.state.isLoaded
+    //   if (state.allTodos) {
+    //     state.todo = store.getters.getFilterTodosByTodo
+    //     state.done = store.getters.getFilterTodosByDone
+    //   }
+    //   if (store.state.selectedOption) {
+    //     const filterTodo = store.getters.getFilterTodosBySortPriority
+    //     const filterDone = store.getters.getFilterTodosByDone
+    //
+    //     if (store.state.selectedOption !== 'Все') {
+    //       state.todo = store.getters.getTodosBySelectedOption(filterTodo)
+    //       state.done = store.getters.getTodosBySelectedOption(filterDone)
+    //     } else {
+    //       state.todo = filterTodo
+    //       state.done = filterDone
+    //     }
+    //   }
+    // })
 
     return {
-      state, remove, done, rewritePriority, dragEvent
+      state, remove, doneTask, rewritePriority, dragEvent
     }
   }
 }

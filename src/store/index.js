@@ -13,8 +13,6 @@ export default createStore({
         selectedOption: 'Все',
     },
     getters: {
-
-
         getFilterTodosByDone(state) {
             return state.modal.todos.filter(item => item.type === 'done')
         },
