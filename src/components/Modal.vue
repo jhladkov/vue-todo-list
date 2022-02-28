@@ -137,12 +137,15 @@ export default {
       }
     }
 
-    // watchEffect(() => {
-    //   state.options = store.state.sections
-    // })
-
     return {
-      closeModel, state, v$, createTodo, getImg, activeUpload, setElementRef, setSection
+      closeModel,
+      state,
+      v$,
+      createTodo,
+      getImg,
+      activeUpload,
+      setElementRef,
+      setSection
     }
   }
 }

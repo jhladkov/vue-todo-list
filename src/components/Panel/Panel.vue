@@ -17,7 +17,7 @@
         <TodoItem
             @dragleave.prevent="dragEvent(item.id)"
             draggable="true"
-            v-if="typePanel === 'todo' && todo.length > 0"
+            v-if="todoConditionShow"
             @done="doneTask"
             @remove="remove"
             v-for="item in todo"
@@ -32,7 +32,7 @@
         <TodoItem
             @dragleave.prevent="dragEvent(item.id)"
             draggable="true"
-            v-else-if="typePanel === 'done' && done.length > 0"
+            v-else-if="doneConditionShow"
             @done="doneTask"
             v-for="item in done"
             :id="item.id"
@@ -62,12 +62,14 @@
       </div>
     </div>
   </Section>
+
 </template>
 
 <script>
 
 import TodoItem from "../TodoItem/TodoItem";
 import Section from "../../hooc/Section";
+import {computed} from "vue";
 
 export default {
   components: {Section, TodoItem},
@@ -91,6 +93,13 @@ export default {
   },
   setup(props, {emit}) {
 
+    const todoConditionShow = computed(() => {
+      return props.typePanel === 'todo' && props.todo.length > 0
+    })
+    const doneConditionShow = computed(() => {
+      return props.typePanel === 'done' && props.done.length > 0
+    })
+
     const doneTask = (id, img, index = null) => {
       emit('doneTask',id,img,index)
     }
@@ -108,7 +117,12 @@ export default {
     }
 
     return {
-       remove, doneTask, rewritePriority, dragEvent
+       remove,
+      doneTask,
+      rewritePriority,
+      dragEvent,
+      todoConditionShow,
+      doneConditionShow
     }
   }
 }

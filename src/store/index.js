@@ -88,7 +88,6 @@ export default createStore({
 
 
         },
-
         getSectionFromDatabase({commit}, payload) {
             const dbRef = ref(getDatabase());
 
@@ -114,6 +113,8 @@ export default createStore({
                 })
             }
         },
+
+
 
         writeDataInDatabase({state, commit}, obj) {
             useWriteData(obj.path, obj.value) // write and change any data in the database

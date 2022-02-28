@@ -12,7 +12,7 @@ export default {
   name: 'Section',
   props:{
     sectionClass: {
-      type: String
+      type: [String,Array]
     }
   }
 }

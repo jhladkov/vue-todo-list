@@ -41,7 +41,7 @@
 <script>
 import Button from "../UI/Button";
 import {useStore} from 'vuex'
-import {onMounted, reactive, watchEffect} from "vue";
+import {reactive, watchEffect} from "vue";
 import Section from "../hooc/Section";
 import Panel from "../components/Panel/Panel";
 import {getStorage, ref} from "firebase/storage";

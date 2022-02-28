@@ -3,10 +3,17 @@
     <Container>
       <div class="header__wrapper">
         <div class="header__logo">
-          <img src="@/assets/logo.png" alt="">
+          <img
+              src="@/assets/logo.png"
+              alt=""
+          >
         </div>
         <div class="header__inner">
-          <AccountInfo :src="state.img" :name="state.name" @exit="exit"/>
+          <AccountInfo
+              :src="state.img"
+              :name="state.name"
+              @exit="exit"
+          />
         </div>
       </div>
     </Container>
@@ -28,12 +35,7 @@ export default {
 
     const state = reactive({
       name: store?.state?.userInfo?.user?.displayName,
-      img: store?.state?.userInfo?.user?.photoURL
-    })
-
-    watchEffect(() => {
-      state.name = store?.state?.userInfo?.user?.displayName
-      state.img = store?.state?.userInfo?.user?.photoURL
+      img: store?.state?.userInfo?.user?.photoURL,
     })
 
     const exit = () => {
@@ -41,6 +43,11 @@ export default {
       store.dispatch('resetState')
       router.push('/login')
     }
+
+    watchEffect(() => {
+      state.name = store?.state?.userInfo?.user?.displayName
+      state.img = store?.state?.userInfo?.user?.photoURL
+    })
 
     return {
       state, exit

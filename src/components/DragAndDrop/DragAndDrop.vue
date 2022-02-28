@@ -1,37 +1,68 @@
 <template>
-  <div v-if="!state.uploadStatus"
-       :class="state.drag ? 'modal__inner drag' : 'modal__inner'"
-       @dragstart.prevent="state.drag = true"
-       @dragleave.prevent="state.drag = false"
-       @dragover.prevent="state.drag = true"
-       @drop.prevent="dropData"
+  <div
+      v-if="!state.uploadStatus"
+      :class="dragClass"
+      @dragstart.prevent="state.drag = true"
+      @dragleave.prevent="state.drag = false"
+      @dragover.prevent="state.drag = true"
+      @drop.prevent="dropData"
   >
     <div class="modal__drag drag-area">
-      <div class="drag-area__loader" v-if="state.loadingStatus">
+      <div
+          v-if="state.loadingStatus"
+          class="drag-area__loader"
+      >
         <Loader/>
-        <Button @click="cancelSendData" button-type="button" item-class="drag-area__button button remove"
-                text="Отменить загрузку"/>
+        <Button
+            @click="cancelSendData"
+            item-class="drag-area__button remove"
+            text="Отменить загрузку"
+        />
       </div>
-      <div v-else class="drag-area-info">
-        <div v-if="!state.drag" class="img-wrapper__inner">
-          <Input @getFile="dropData" input-class="button" placeholder="Выберите файл" input-type="file"/>
+      <div
+          v-else
+          class="drag-area-info"
+      >
+        <div
+            v-if="!state.drag"
+            class="img-wrapper__inner"
+        >
+          <Input
+              @getFile="dropData"
+              input-class="button"
+              placeholder="Выберите файл"
+              input-type="file"
+          />
         </div>
-        <p v-if="!state.drag" class="drag-area-info__text"> или Вставьте файл</p>
-        <div v-if="!state.drag" class="drag-area-info__inner">
+        <p
+            v-if="!state.drag"
+            class="drag-area-info__text"
+        >
+          или Вставьте файл
+        </p>
+        <div
+            v-if="!state.drag"
+            class="drag-area-info__inner"
+        >
           <p class="drag-area-info__text"> или </p>
-          <Svg v-if="!state.recordingAudioStatus" @click="recordingAudio(true)" view-box="0 0 32 32"
-               class-svg="drag-area-info__svg svg"
-               path="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM12 9l12 7-12 7z"/>
-          <Svg v-if="state.recordingAudioStatus" @click="recordingAudio(false)" view-box="0 0 32 32"
-               class-svg="drag-area-info__svg svg"
-               path="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM10 10h4v12h-4zM18 10h4v12h-4z"/>
+          <Svg
+              v-if="!state.recordingAudioStatus"
+              @click="recordingAudio(true)"
+              view-box="0 0 32 32"
+              class-svg="drag-area-info__svg svg"
+              :path="recordingStartPathSvg"
+          />
+          <Svg
+              v-if="state.recordingAudioStatus"
+              @click="recordingAudio(false)"
+              view-box="0 0 32 32"
+              class-svg="drag-area-info__svg svg"
+              :path="recordingStopPathSvg"
+          />
         </div>
-
         <p v-else class="drag-area-info__text">Отпустите файл</p>
       </div>
     </div>
-
-
   </div>
   <DragAndDropResult
       @deleteData="deleteData"
@@ -39,9 +70,7 @@
       :url="state.dataInfo.url"
       class-name="modal__inner img-wrapper"
       type-result="image"
-      v-else-if="state.sendDataInfo.type === 'image/jpeg'
-      || state.sendDataInfo.type === 'image/png'
-      || state.sendDataInfo.type === 'image/webp'"
+      v-else-if="conditionImgResult"
   />
   <DragAndDropResult
       @dropData="dropData"
@@ -49,7 +78,7 @@
       :url="state.dataInfo.url"
       class-name="modal__inner video-wrapper"
       type-result="video"
-      v-else-if="state.sendDataInfo.type === 'video/mp4'"
+      v-else-if="conditionVideoResult"
   />
   <DragAndDropResult
       @dropData="dropData"
@@ -57,12 +86,12 @@
       :url="state.dataInfo.url"
       class-name="modal__inner audio-wrapper"
       type-result="audio"
-      v-else-if="state.sendDataInfo.type === 'audio/mpeg' || state.sendDataInfo.type === 'audio/ogg' || state.sendDataInfo.type === 'audio/webm'"
+      v-else-if="conditionAudioResult"
   />
 </template>
 
 <script>
-import {reactive, watchEffect, watch} from "vue";
+import {reactive, watchEffect, watch, computed} from "vue";
 import {getStorage, ref, uploadBytesResumable, getDownloadURL} from "firebase/storage";
 import {useRemoveData} from "../../hooks/useRemoveData";
 import DragAndDropResult from "../DragAndDropResult/DragAndDropResult";
@@ -72,7 +101,6 @@ export default {
   components: {Svg, DragAndDropResult},
   setup(props, {emit}) {
     const storage = getStorage();
-
     const state = reactive({
       stopRecording: false,
       itemsRecorder: [],
@@ -98,6 +126,29 @@ export default {
         url: '',
         elementRef: ''
       }
+    })
+
+    const dragClass = computed(() => {
+      return state.drag ? 'modal__inner drag' : 'modal__inner'
+    })
+    const recordingStartPathSvg = computed(() => {
+      return 'M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM12 9l12 7-12 7z'
+    })
+    const recordingStopPathSvg = computed(() => {
+      return 'M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM10 10h4v12h-4zM18 10h4v12h-4z'
+    })
+    const conditionImgResult = computed(() => {
+      return state.sendDataInfo.type === 'image/jpeg'
+          || state.sendDataInfo.type === 'image/png'
+          || state.sendDataInfo.type === 'image/webp'
+    })
+    const conditionVideoResult = computed(() => {
+      return state.sendDataInfo.type === 'video/mp4'
+    })
+    const conditionAudioResult = computed(() => {
+      return state.sendDataInfo.type === 'audio/mpeg'
+          || state.sendDataInfo.type === 'audio/ogg'
+          || state.sendDataInfo.type === 'audio/webm'
     })
 
     let upload;
@@ -232,7 +283,17 @@ export default {
           emit('activeUpload', false, state.sendDataInfo.type)
     }
     return {
-      state, dropData, deleteData, cancelSendData, recordingAudio
+      state,
+      dropData,
+      deleteData,
+      cancelSendData,
+      recordingAudio,
+      dragClass,
+      recordingStartPathSvg,
+      recordingStopPathSvg,
+      conditionImgResult,
+      conditionAudioResult,
+      conditionVideoResult
     }
   }
 }
