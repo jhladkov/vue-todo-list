@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import {reactive, watchEffect, watch, computed} from "vue";
+import {reactive, computed} from "vue";
 import {getStorage, ref, uploadBytesResumable, getDownloadURL} from "firebase/storage";
 import {useRemoveData} from "../../hooks/useRemoveData";
 import DragAndDropResult from "../DragAndDropResult/DragAndDropResult";
@@ -169,14 +169,14 @@ export default {
       if (Object.values(state.validType).includes(file.type) || isBlob) {
         emit('removeElementRef', elementRef)
         upload = uploadBytesResumable(elementRef, file)
-        watchEffect(() => {
-          if (state.cancel) {
-            console.log(upload.cancel());
-            state.cancel = false
-            state.loadingStatus = false
-
-          }
-        })
+        // watchEffect(() => {
+        //   if (state.cancel) {
+        //     console.log(upload.cancel());
+        //     state.cancel = false
+        //     state.loadingStatus = false
+        //
+        //   }
+        // })
         upload.then(() => {
           getDownloadURL(ref(storage, elementRef))
               .then((url) => {
@@ -279,8 +279,10 @@ export default {
     }
     const cancelSendData = () => {
       upload.cancel();
-      state.loadingStatus = false,
-          emit('activeUpload', false, state.sendDataInfo.type)
+      state.sendDataInfo = {}
+      state.loadingStatus = false
+      emit('activeUpload', false, state.sendDataInfo.type)
+      emit('removeElementRef', null)
     }
     return {
       state,

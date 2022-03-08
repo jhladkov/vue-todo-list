@@ -43,7 +43,6 @@ export default {
       store.dispatch('resetState')
       router.push('/login')
     }
-
     watchEffect(() => {
       state.name = store?.state?.userInfo?.user?.displayName
       state.img = store?.state?.userInfo?.user?.photoURL

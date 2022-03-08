@@ -22,7 +22,7 @@
             @remove="remove"
             v-for="item in todo"
             @selectedOption="rewritePriority"
-            :typeData="item.type"
+            :typeData="item.storageInfo.type"
             :id="item.id"
             :value="item.value"
             :key="item.id"
@@ -69,7 +69,7 @@
 
 import TodoItem from "../TodoItem/TodoItem";
 import Section from "../../hooc/Section";
-import {computed} from "vue";
+import {computed, watchEffect} from "vue";
 
 export default {
   components: {Section, TodoItem},

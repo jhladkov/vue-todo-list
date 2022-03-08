@@ -48,17 +48,22 @@
 </style>
 <script>
 import Header from "./components/Header/Header";
-import Modal from "./components/Modal";
+
 import {useStore} from "vuex";
-import {onMounted, reactive, watchEffect} from "vue";
-import {useWriteData} from "./hooks/useWriteData";
+import {defineAsyncComponent, onMounted, reactive, watchEffect} from "vue";
 import Form from "./components/Form/Form";
 import Select from "./UI/Select";
 import ControlPanel from "./components/ControlPanel/ControlPanel";
 
 
 export default {
-  components: {ControlPanel, Select, Form, Modal, Header},
+  components: {
+    ControlPanel,
+    Select,
+    Form,
+    Modal: defineAsyncComponent(() => import ("./components/Modal")),
+    Header
+  },
   setup() {
     const store = useStore()
     const state = reactive({
@@ -118,6 +123,13 @@ export default {
       getDataTodo()
       getDataSection()
     })
+
+   // window.onbeforeunload = (e) => {
+   //   console.log(e)
+   //    const ms = 'stooop!'
+   //    e.returnValue = ms
+   //    return ms
+   //  }
 
     watchEffect(() => {
       if (!state.sectionName) {

@@ -48,7 +48,8 @@
           text="Приоритет: "
           :options="state.options"
           class-name="item__priority-select"
-          type-open="bottom"/>
+          type-open="bottom"
+      />
     </div>
 
     <div class="item__inner">
@@ -99,6 +100,7 @@ export default {
     })
 
     const validDataImg = computed(() => {
+      console.log(props.typeData)
       return props.url
           && props.typeData === 'image/jpeg'
           || props.typeData === 'image/png'

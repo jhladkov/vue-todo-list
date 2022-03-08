@@ -68,7 +68,7 @@ export default createStore({
                 console.log(payload)
                 console.log('request again')
                 callRequest()
-            },5000)
+            }, 5000)
             const callRequest = () => {
                 get(child(dbRef, `${payload.uid}/${payload.path}`))
                     .then((snapshot) => {
@@ -85,8 +85,6 @@ export default createStore({
                         clearInterval(interval)
                     })
             }
-
-
         },
         getSectionFromDatabase({commit}, payload) {
             const dbRef = ref(getDatabase());
@@ -95,7 +93,7 @@ export default createStore({
                 console.log(payload)
                 console.log('request again')
                 callRequest()
-            },5000)
+            }, 5000)
             const callRequest = () => {
                 get(child(dbRef, `${payload.uid}/${payload.path}`)).then((snapshot) => {
                     commit('setLoading', true)
@@ -106,14 +104,17 @@ export default createStore({
                             commit('setSections', data)
                         }
                     } else {
-                        commit('setSections', [{id: Math.floor(Math.random() * 1000000), value: 'Все', notDelete: true}])
+                        commit('setSections', [{
+                            id: Math.floor(Math.random() * 1000000),
+                            value: 'Все',
+                            notDelete: true
+                        }])
                         console.log("No data available");
                     }
                     clearInterval(interval)
                 })
             }
         },
-
 
 
         writeDataInDatabase({state, commit}, obj) {

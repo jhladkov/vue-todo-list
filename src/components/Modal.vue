@@ -1,5 +1,5 @@
 <template>
-  <Section section-class="section modal">
+  <Section section-class="modal">
     <div class="modal__wrapper">
       <div class="modal__header">
         <Title
@@ -114,14 +114,20 @@ export default {
     }
 
     const setElementRef = (value) => {
-      if (value) {
         state.elementRef = value
-      }
     }
 
     const createTodo = () => {
       if (!v$.value.$error && !state.activeUpload) {
-        const obj = useObjectTodo(state.section, 1, 'todo', state.inputText, state.storageData.url, state.storageData.type, Math.floor(Math.random() * 1000000))
+        const obj = useObjectTodo(
+            state.section,
+            1,
+            'todo',
+            state.inputText,
+            state.storageData.url,
+            state.storageData.type,
+            Math.floor(Math.random() * 1000000)
+        )
 
         store.dispatch('writeDataInDatabase', {
           path: 'todo',
