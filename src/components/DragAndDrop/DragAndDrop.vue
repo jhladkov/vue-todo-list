@@ -96,12 +96,15 @@ import {getStorage, ref, uploadBytesResumable, getDownloadURL} from "firebase/st
 import {useRemoveData} from "../../hooks/useRemoveData";
 import DragAndDropResult from "../DragAndDropResult/DragAndDropResult";
 import Svg from "../../UI/Svg";
+import {useStore} from "vuex";
 
 export default {
   components: {Svg, DragAndDropResult},
   setup(props, {emit}) {
     const storage = getStorage();
+    const store = useStore()
     const state = reactive({
+      uid: JSON.parse(localStorage.getItem('userData')).user.uid,
       stopRecording: false,
       itemsRecorder: [],
       drag: false,
@@ -159,7 +162,7 @@ export default {
       }
       state.activeUpload = true
       state.loadingStatus = true
-      const elementRef = ref(storage, `${JSON.parse(localStorage.getItem('userData')).user.uid}/${state.sendDataInfo.name}`);
+      const elementRef = ref(storage, `${state.uid}/${state.sendDataInfo.name}`);
       const file = value;
       console.log('filesend', file)
 
@@ -168,34 +171,19 @@ export default {
 
       if (Object.values(state.validType).includes(file.type) || isBlob) {
         emit('removeElementRef', elementRef)
-        upload = uploadBytesResumable(elementRef, file)
-        // watchEffect(() => {
-        //   if (state.cancel) {
-        //     console.log(upload.cancel());
-        //     state.cancel = false
-        //     state.loadingStatus = false
-        //
-        //   }
-        // })
-        upload.then(() => {
-          getDownloadURL(ref(storage, elementRef))
-              .then((url) => {
-                if (url) {
-                  console.log('ref', elementRef)
-                  state.loadingStatus = false
-                  state.dataInfo.elementRef = elementRef
-                  state.dataInfo.url = url
-                  state.activeUpload = false
-                  state.uploadStatus = true
-                  emit('activeUpload', state.activeUpload, value.type)
-                  emit('getUrlImg', url)
-                }
-                console.log(url)
-              })
-              .catch((error) => {
-                console.log('error', error)
-              });
-
+         store.dispatch('uploadBytes',{
+           storage,
+           elementRef,
+           file
+         })
+        .then(url => {
+          state.loadingStatus = false
+          state.dataInfo.elementRef = elementRef
+          state.dataInfo.url = url
+          state.activeUpload = false
+          state.uploadStatus = true
+          emit('activeUpload', state.activeUpload, value.type)
+          emit('getUrlImg', url)
         })
       } else {
         state.activeUpload = false

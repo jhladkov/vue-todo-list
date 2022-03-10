@@ -3,6 +3,7 @@ import {modal} from "./modal";
 import {useWriteData} from "../hooks/useWriteData";
 import {useRemoveData} from "../hooks/useRemoveData";
 import {child, get, getDatabase, ref} from "firebase/database";
+import {getDownloadURL, uploadBytesResumable, ref as storageRef} from "firebase/storage";
 
 export default createStore({
     state: {
@@ -64,11 +65,11 @@ export default createStore({
     actions: {
         getTodoFromDatabase({commit}, payload) {
             const dbRef = ref(getDatabase());
-            const interval = setInterval(() => {
-                console.log(payload)
-                console.log('request again')
-                callRequest()
-            }, 5000)
+            // const interval = setInterval(() => {
+            //     console.log(payload)
+            //     console.log('request again')
+            //     callRequest()
+            // }, 1000)
             const callRequest = () => {
                 get(child(dbRef, `${payload.uid}/${payload.path}`))
                     .then((snapshot) => {
@@ -77,23 +78,28 @@ export default createStore({
                         if (snapshot.exists()) {
                             const data = snapshot.val().data
                             if (data) {
+                                console.log(data)
                                 commit('setTodos', data)
+                            } else {
+                                console.log('request Todo!')
+                                callRequest()
                             }
                         } else {
                             console.log("No data available");
                         }
-                        clearInterval(interval)
+                        // clearInterval(interval)
                     })
             }
+            callRequest()
         },
         getSectionFromDatabase({commit}, payload) {
             const dbRef = ref(getDatabase());
 
-            const interval = setInterval(() => {
-                console.log(payload)
-                console.log('request again')
-                callRequest()
-            }, 5000)
+            // const interval = setInterval(() => {
+            //     console.log(payload)
+            //     console.log('request again')
+            //     callRequest()
+            // }, 5000)
             const callRequest = () => {
                 get(child(dbRef, `${payload.uid}/${payload.path}`)).then((snapshot) => {
                     commit('setLoading', true)
@@ -102,6 +108,9 @@ export default createStore({
                         const data = snapshot.val().data
                         if (data) {
                             commit('setSections', data)
+                        } else {
+                            console.log('request Section')
+                            callRequest()
                         }
                     } else {
                         commit('setSections', [{
@@ -111,11 +120,31 @@ export default createStore({
                         }])
                         console.log("No data available");
                     }
-                    clearInterval(interval)
+                    // clearInterval(interval)
+                    callRequest()
                 })
             }
         },
 
+         uploadBytes({commit}, {storage, elementRef, file}) {
+            return new Promise((resolve, reject) => {
+                uploadBytesResumable(elementRef, file)
+                    .then(() => {
+                        getDownloadURL(storageRef(storage, elementRef))
+                            .then((url) => {
+                                if (url) {
+                                    console.log('ref', elementRef)
+                                    resolve(url)
+                                }
+                                console.log(url)
+                            })
+                            .catch((error) => {
+                                reject()
+                                console.log('error', error)
+                            });
+                    })
+            })
+        },
 
         writeDataInDatabase({state, commit}, obj) {
             useWriteData(obj.path, obj.value) // write and change any data in the database
