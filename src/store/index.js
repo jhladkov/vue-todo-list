@@ -60,6 +60,9 @@ export default createStore({
         },
         setSections(state, payload) {
             state.sections = payload
+        },
+        setPermissions(state,payload) {
+            state.permissions = payload
         }
     },
     actions: {
@@ -121,9 +124,9 @@ export default createStore({
                         console.log("No data available");
                     }
                     // clearInterval(interval)
-                    callRequest()
                 })
             }
+            callRequest()
         },
 
          uploadBytes({commit}, {storage, elementRef, file}) {
@@ -169,6 +172,9 @@ export default createStore({
         },
         changeSection({commit}, payload) {
             commit('setSections', payload)
+        },
+        changePermission({commit},obj) {
+            commit('setPermissions',obj)
         }
     },
     modules: {

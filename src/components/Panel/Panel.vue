@@ -17,7 +17,7 @@
         <TodoItem
             @dragleave.prevent="dragEvent(item.id)"
             draggable="true"
-            v-if="todoConditionShow"
+            v-if="todoConditionShow('todo')"
             @done="doneTask"
             @remove="remove"
             v-for="item in todo"
@@ -93,8 +93,8 @@ export default {
   },
   setup(props, {emit}) {
 
-    const todoConditionShow = computed(() => {
-      return props.typePanel === 'todo' && props.todo.length > 0
+    const todoConditionShow = computed(() => (type) => {
+      return props.typePanel === type && props.todo.length > 0
     })
     const doneConditionShow = computed(() => {
       return props.typePanel === 'done' && props.done.length > 0

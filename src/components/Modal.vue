@@ -45,6 +45,8 @@
             button-type="submit"
         />
 
+        <Button @click="testF">{{test}}</Button>
+
       </Form>
     </div>
   </Section>
@@ -134,7 +136,7 @@ export default {
           value: {data: [...store.state.modal.todos, obj]}
         })
 
-        store.dispatch('changeTodosArr', [...store.state.modal.todos, obj])
+        store.commit('setTodos', [...store.state.modal.todos, obj])
         closeModel(false)
         state.inputText = ''
         state.storageData.url = ''

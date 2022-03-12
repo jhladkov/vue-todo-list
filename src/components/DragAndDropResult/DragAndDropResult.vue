@@ -1,5 +1,8 @@
 <template>
-  <div :class="className">
+  <div
+      class="modal__inner"
+      :class="className"
+  >
     <video v-if="typeResult === 'video'" :src="url" controls></video>
     <audio v-if="typeResult === 'audio'" :src="url" controls></audio>
     <img v-if="typeResult === 'image'" :src="url" alt="">
@@ -13,6 +16,7 @@
 </template>
 
 <script>
+
 export default {
   props: {
     typeResult: {
@@ -23,6 +27,7 @@ export default {
     className: String
   },
   setup(props,{emit}) {
+
     const change = (event, wasActiveInput) => {
       console.log(event,wasActiveInput)
       emit('dropData',event, wasActiveInput)

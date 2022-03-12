@@ -64,36 +64,46 @@
       </div>
     </div>
   </div>
+
   <DragAndDropResult
+      v-for="result in state.resultDragAndDropInfo"
       @deleteData="deleteData"
       @dropData="dropData"
       :url="state.dataInfo.url"
-      class-name="modal__inner img-wrapper"
-      type-result="image"
-      v-else-if="conditionImgResult"
+      :class-name="result.class"
+      :type-result="validation"
+      v-if="validation === 'image'"
   />
-  <DragAndDropResult
-      @dropData="dropData"
-      @deleteData="deleteData"
-      :url="state.dataInfo.url"
-      class-name="modal__inner video-wrapper"
-      type-result="video"
-      v-else-if="conditionVideoResult"
-  />
-  <DragAndDropResult
-      @dropData="dropData"
-      @deleteData="deleteData"
-      :url="state.dataInfo.url"
-      class-name="modal__inner audio-wrapper"
-      type-result="audio"
-      v-else-if="conditionAudioResult"
-  />
+
+  <!--  <DragAndDropResult-->
+  <!--      @deleteData="deleteData"-->
+  <!--      @dropData="dropData"-->
+  <!--      :url="state.dataInfo.url"-->
+  <!--      class-name="img-wrapper"-->
+  <!--      type-result="image"-->
+  <!--      v-else-if="conditionImgResult"-->
+  <!--  />-->
+  <!--  <DragAndDropResult-->
+  <!--      @dropData="dropData"-->
+  <!--      @deleteData="deleteData"-->
+  <!--      :url="state.dataInfo.url"-->
+  <!--      class-name="video-wrapper"-->
+  <!--      type-result="video"-->
+  <!--      v-else-if="conditionVideoResult"-->
+  <!--  />-->
+  <!--  <DragAndDropResult-->
+  <!--      @dropData="dropData"-->
+  <!--      @deleteData="deleteData"-->
+  <!--      :url="state.dataInfo.url"-->
+  <!--      class-name="audio-wrapper"-->
+  <!--      type-result="audio"-->
+  <!--      v-else-if="conditionAudioResult"-->
+  <!--  />-->
 </template>
 
 <script>
 import {reactive, computed} from "vue";
-import {getStorage, ref, uploadBytesResumable, getDownloadURL} from "firebase/storage";
-import {useRemoveData} from "../../hooks/useRemoveData";
+import {getStorage, ref} from "firebase/storage";
 import DragAndDropResult from "../DragAndDropResult/DragAndDropResult";
 import Svg from "../../UI/Svg";
 import {useStore} from "vuex";
@@ -104,6 +114,11 @@ export default {
     const storage = getStorage();
     const store = useStore()
     const state = reactive({
+      resultDragAndDropInfo: [
+        {class: 'img-wrapper', typeResult: 'image'},
+        {class: 'video-wrapper', typeResult: 'video'},
+        {class: 'audio-wrapper', typeResult: 'audio'},
+      ],
       uid: JSON.parse(localStorage.getItem('userData')).user.uid,
       stopRecording: false,
       itemsRecorder: [],
@@ -131,6 +146,8 @@ export default {
       }
     })
 
+    console.log(state.resultDragAndDropInfo)
+
     const dragClass = computed(() => {
       return state.drag ? 'modal__inner drag' : 'modal__inner'
     })
@@ -140,18 +157,33 @@ export default {
     const recordingStopPathSvg = computed(() => {
       return 'M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM10 10h4v12h-4zM18 10h4v12h-4z'
     })
-    const conditionImgResult = computed(() => {
-      return state.sendDataInfo.type === 'image/jpeg'
+    const validation = computed(() => {
+      if (
+          state.sendDataInfo.type === 'image/jpeg'
           || state.sendDataInfo.type === 'image/png'
           || state.sendDataInfo.type === 'image/webp'
-    })
-    const conditionVideoResult = computed(() => {
-      return state.sendDataInfo.type === 'video/mp4'
-    })
-    const conditionAudioResult = computed(() => {
-      return state.sendDataInfo.type === 'audio/mpeg'
+      ) {
+        return 'image'
+      }
+
+      if (state.sendDataInfo.type === 'video/mp4') {
+        return 'video'
+      }
+      if (
+          state.sendDataInfo.type === 'audio/mpeg'
           || state.sendDataInfo.type === 'audio/ogg'
           || state.sendDataInfo.type === 'audio/webm'
+      ) {
+        return 'audio'
+      }
+
+      return null
+    })
+    const conditionVideoResult = computed(() => {
+      return
+    })
+    const conditionAudioResult = computed(() => {
+      return
     })
 
     let upload;
@@ -171,20 +203,20 @@ export default {
 
       if (Object.values(state.validType).includes(file.type) || isBlob) {
         emit('removeElementRef', elementRef)
-         store.dispatch('uploadBytes',{
-           storage,
-           elementRef,
-           file
-         })
-        .then(url => {
-          state.loadingStatus = false
-          state.dataInfo.elementRef = elementRef
-          state.dataInfo.url = url
-          state.activeUpload = false
-          state.uploadStatus = true
-          emit('activeUpload', state.activeUpload, value.type)
-          emit('getUrlImg', url)
+        store.dispatch('uploadBytes', {
+          storage,
+          elementRef,
+          file
         })
+            .then(url => {
+              state.loadingStatus = false
+              state.dataInfo.elementRef = elementRef
+              state.dataInfo.url = url
+              state.activeUpload = false
+              state.uploadStatus = true
+              emit('activeUpload', state.activeUpload, value.type)
+              emit('getUrlImg', url)
+            })
       } else {
         state.activeUpload = false
         state.uploadStatus = false
@@ -194,7 +226,8 @@ export default {
     }
     const deleteData = () => {
       if (state.dataInfo.elementRef) {
-        useRemoveData(state.dataInfo.elementRef)
+        // useRemoveData(state.dataInfo.elementRef)
+        store.dispatch('removeDataFromDatabase', state.dataInfo.elementRef)
         state.sendDataInfo.name = ''
         state.uploadStatus = false
         state.dataInfo.url = ''
@@ -219,52 +252,53 @@ export default {
 
     }
     const recordingAudio = (active) => {
-      if (active) {
-        emit('activeUpload', true, state.sendDataInfo.type)
-        state.stopRecording = false   //
-      }
-      state.recordingAudioStatus = !state.recordingAudioStatus
-      if (!Array.isArray(state.itemsRecorder)) {
-        state.itemsRecorder = []
-      }
-      const device = navigator.mediaDevices.getUserMedia({audio: true})
       let items = [];
-      device.then(stream => {
-        const recorder = new MediaRecorder(stream)
-        if (recorder.state !== 'recorder') {
-          recorder.ondataavailable = e => {
-            if (!state.stopRecording) {
-              items.push(e.data)
-              if (Array.isArray(state.itemsRecorder)) {
-                state.itemsRecorder = items
+
+      navigator.mediaDevices.getUserMedia({audio: true})
+          .then(stream => {
+            if (active) {
+              emit('activeUpload', true, state.sendDataInfo.type)
+              state.stopRecording = false   //
+            }
+            state.recordingAudioStatus = !state.recordingAudioStatus
+            if (!Array.isArray(state.itemsRecorder)) {
+              state.itemsRecorder = []
+            }
+            const recorder = new MediaRecorder(stream)
+            if (recorder.state !== 'recorder') {
+              recorder.ondataavailable = e => {
+                if (!state.stopRecording) {
+                  items.push(e.data)
+                  if (Array.isArray(state.itemsRecorder)) {
+                    state.itemsRecorder = items
+                  }
+                } else {
+                  recorder.stop()
+                  items = []
+                }
               }
+            }
+            if (active) {
+              recorder.start(10)
             } else {
-              recorder.stop()
-              items = []
-            }
-          }
-        }
-        if (active) {
-          recorder.start(10)
-        } else {
-          try {
-            if (!state.recordingAudioStatus) {
-              state.recordingAudioStatus = false
-              state.stopRecording = true
-              const blob = new Blob(state.itemsRecorder, {type: 'audio/webm'})
-              state.sendDataInfo.name = recorder.stream.id
-              state.sendDataInfo.type = 'audio/webm'
-              state.itemsRecorder = null
-              if (blob) {
-                sendDataToStorage(blob, true)
+              if (!state.recordingAudioStatus) {
+                state.recordingAudioStatus = false
+                state.stopRecording = true
+                const blob = new Blob(state.itemsRecorder, {type: 'audio/webm'})
+                state.sendDataInfo.name = recorder.stream.id
+                state.sendDataInfo.type = 'audio/webm'
+                state.itemsRecorder = null
+                if (blob) {
+                  sendDataToStorage(blob, true)
+                }
               }
             }
-          } catch (err) {
-            console.log(err)
-          }
-        }
-      })
+          })
+          .catch(err => {
+            alert('Вы запретили или не разрешили использовать микрофон')
+          })
     }
+
     const cancelSendData = () => {
       upload.cancel();
       state.sendDataInfo = {}
@@ -281,7 +315,7 @@ export default {
       dragClass,
       recordingStartPathSvg,
       recordingStopPathSvg,
-      conditionImgResult,
+      validation,
       conditionAudioResult,
       conditionVideoResult
     }

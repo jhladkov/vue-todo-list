@@ -120,6 +120,14 @@ export default {
     }
 
     onMounted(() => {
+      // navigator.mediaDevices.getUserMedia({audio: true})
+      // .then(res => {
+      //   if (res) {
+      //     console.log(res)
+      //     store.dispatch('changePermission', {audio:true})
+      //   }
+      // })
+
       getDataTodo()
       getDataSection()
     })
