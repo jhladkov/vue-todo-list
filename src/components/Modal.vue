@@ -45,8 +45,6 @@
             button-type="submit"
         />
 
-        <Button @click="testF">{{test}}</Button>
-
       </Form>
     </div>
   </Section>

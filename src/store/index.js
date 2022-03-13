@@ -61,7 +61,7 @@ export default createStore({
         setSections(state, payload) {
             state.sections = payload
         },
-        setPermissions(state,payload) {
+        setPermissions(state, payload) {
             state.permissions = payload
         }
     },
@@ -129,24 +129,17 @@ export default createStore({
             callRequest()
         },
 
-         uploadBytes({commit}, {storage, elementRef, file}) {
-            return new Promise((resolve, reject) => {
-                uploadBytesResumable(elementRef, file)
-                    .then(() => {
-                        getDownloadURL(storageRef(storage, elementRef))
-                            .then((url) => {
-                                if (url) {
-                                    console.log('ref', elementRef)
-                                    resolve(url)
-                                }
-                                console.log(url)
-                            })
-                            .catch((error) => {
-                                reject()
-                                console.log('error', error)
-                            });
-                    })
-            })
+      async getUrl({commit}, {storage, elementRef}) {
+        return  await getDownloadURL(storageRef(storage, elementRef))
+                .then((url) => {
+                    if (url) {
+                        return url
+                    }
+                })
+                .catch((error) => {
+                    console.log('error', error)
+                });
+
         },
 
         writeDataInDatabase({state, commit}, obj) {
@@ -173,8 +166,8 @@ export default createStore({
         changeSection({commit}, payload) {
             commit('setSections', payload)
         },
-        changePermission({commit},obj) {
-            commit('setPermissions',obj)
+        changePermission({commit}, obj) {
+            commit('setPermissions', obj)
         }
     },
     modules: {

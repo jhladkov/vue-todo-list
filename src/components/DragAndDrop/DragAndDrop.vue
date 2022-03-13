@@ -66,44 +66,18 @@
   </div>
 
   <DragAndDropResult
-      v-for="result in state.resultDragAndDropInfo"
       @deleteData="deleteData"
       @dropData="dropData"
       :url="state.dataInfo.url"
-      :class-name="result.class"
+      :class-name="validation"
       :type-result="validation"
-      v-if="validation === 'image'"
+      v-if="validation && state.dataInfo.url"
   />
-
-  <!--  <DragAndDropResult-->
-  <!--      @deleteData="deleteData"-->
-  <!--      @dropData="dropData"-->
-  <!--      :url="state.dataInfo.url"-->
-  <!--      class-name="img-wrapper"-->
-  <!--      type-result="image"-->
-  <!--      v-else-if="conditionImgResult"-->
-  <!--  />-->
-  <!--  <DragAndDropResult-->
-  <!--      @dropData="dropData"-->
-  <!--      @deleteData="deleteData"-->
-  <!--      :url="state.dataInfo.url"-->
-  <!--      class-name="video-wrapper"-->
-  <!--      type-result="video"-->
-  <!--      v-else-if="conditionVideoResult"-->
-  <!--  />-->
-  <!--  <DragAndDropResult-->
-  <!--      @dropData="dropData"-->
-  <!--      @deleteData="deleteData"-->
-  <!--      :url="state.dataInfo.url"-->
-  <!--      class-name="audio-wrapper"-->
-  <!--      type-result="audio"-->
-  <!--      v-else-if="conditionAudioResult"-->
-  <!--  />-->
 </template>
 
 <script>
 import {reactive, computed} from "vue";
-import {getStorage, ref} from "firebase/storage";
+import {getStorage, ref,uploadBytesResumable} from "firebase/storage";
 import DragAndDropResult from "../DragAndDropResult/DragAndDropResult";
 import Svg from "../../UI/Svg";
 import {useStore} from "vuex";
@@ -143,10 +117,9 @@ export default {
       dataInfo: {
         url: '',
         elementRef: ''
-      }
+      },
+      file: null
     })
-
-    console.log(state.resultDragAndDropInfo)
 
     const dragClass = computed(() => {
       return state.drag ? 'modal__inner drag' : 'modal__inner'
@@ -194,29 +167,30 @@ export default {
       }
       state.activeUpload = true
       state.loadingStatus = true
-      const elementRef = ref(storage, `${state.uid}/${state.sendDataInfo.name}`);
+
       const file = value;
       console.log('filesend', file)
-
+      const elementRef = ref(storage, `${state.uid}/${state.sendDataInfo.name}`);
+      state.dataInfo.elementRef = elementRef
       console.log('elemRef', elementRef)
       console.log('state.sendDataInfo.name', state.sendDataInfo.name)
 
       if (Object.values(state.validType).includes(file.type) || isBlob) {
         emit('removeElementRef', elementRef)
-        store.dispatch('uploadBytes', {
-          storage,
-          elementRef,
-          file
+        upload = uploadBytesResumable(elementRef, file)
+        upload.then(() => {
+          store.dispatch('getUrl',{storage,elementRef})
+          .then(url => {
+            console.log('url',url)
+            state.loadingStatus = false
+            state.dataInfo.elementRef = elementRef
+            state.dataInfo.url = url
+            state.activeUpload = false
+            state.uploadStatus = true
+            emit('activeUpload', state.activeUpload, value.type)
+            emit('getUrlImg', url)
+          })
         })
-            .then(url => {
-              state.loadingStatus = false
-              state.dataInfo.elementRef = elementRef
-              state.dataInfo.url = url
-              state.activeUpload = false
-              state.uploadStatus = true
-              emit('activeUpload', state.activeUpload, value.type)
-              emit('getUrlImg', url)
-            })
       } else {
         state.activeUpload = false
         state.uploadStatus = false
@@ -226,9 +200,8 @@ export default {
     }
     const deleteData = () => {
       if (state.dataInfo.elementRef) {
-        // useRemoveData(state.dataInfo.elementRef)
         store.dispatch('removeDataFromDatabase', state.dataInfo.elementRef)
-        state.sendDataInfo.name = ''
+        state.sendDataInfo = {}
         state.uploadStatus = false
         state.dataInfo.url = ''
         state.dataInfo.elementRef = ''
@@ -246,6 +219,7 @@ export default {
       emit('activeUpload', true, file.type)
       state.sendDataInfo.name = file.name
       state.sendDataInfo.type = file.type
+      state.file = file
       console.log(file)
       sendDataToStorage(file)
       state.drag = false
@@ -300,7 +274,7 @@ export default {
     }
 
     const cancelSendData = () => {
-      upload.cancel();
+      upload.cancel()
       state.sendDataInfo = {}
       state.loadingStatus = false
       emit('activeUpload', false, state.sendDataInfo.type)
