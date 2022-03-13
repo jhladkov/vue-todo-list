@@ -34,6 +34,8 @@
 
 <script>
 import {useStore} from "vuex";
+import {ref,getStorage} from "firebase/storage";
+
 
 
 export default {
@@ -46,6 +48,7 @@ export default {
   },
   setup(props, {emit}) {
     const store = useStore()
+    const storage = getStorage()
 
     const openSectionModal = () => {
       emit('openSectionModal')
@@ -61,15 +64,22 @@ export default {
     }
     const removeSection = (id, sectionName) => {
       const filterSection = store.state.sections.filter(item => item.id !== id)
-      const filterTodos = store.state.modal.todos.filter(item => item.section !== sectionName)
+      const filterTodos = store.state.modal.todos.filter(item => {
+        const elementRef = ref(storage, item.storageInfo.url);
+
+        if (item.storageInfo.url) {
+          store.dispatch('removeDataFromDatabase',elementRef)
+        }
+        return item.section !== sectionName
+      })
       store.dispatch('changeSection', filterSection)
       store.dispatch('changeTodosArr', filterTodos)
-      store.dispatch('writeDataInDatabase',{
-        path:'sections',
+      store.dispatch('writeDataInDatabase', {
+        path: 'sections',
         value: {data: filterSection}
       })
-      store.dispatch('writeDataInDatabase',{
-        path:'todo',
+      store.dispatch('writeDataInDatabase', {
+        path: 'todo',
         value: {data: filterTodos}
       })
     }

@@ -152,12 +152,6 @@ export default {
 
       return null
     })
-    const conditionVideoResult = computed(() => {
-      return
-    })
-    const conditionAudioResult = computed(() => {
-      return
-    })
 
     let upload;
 
@@ -168,22 +162,21 @@ export default {
       state.activeUpload = true
       state.loadingStatus = true
 
-      const file = value;
-      console.log('filesend', file)
+      console.log('filesend', value)
       const elementRef = ref(storage, `${state.uid}/${state.sendDataInfo.name}`);
+      store.commit('setElementRef',elementRef)
       state.dataInfo.elementRef = elementRef
       console.log('elemRef', elementRef)
       console.log('state.sendDataInfo.name', state.sendDataInfo.name)
 
-      if (Object.values(state.validType).includes(file.type) || isBlob) {
+      if (Object.values(state.validType).includes(value.type) || isBlob) {
         emit('removeElementRef', elementRef)
-        upload = uploadBytesResumable(elementRef, file)
+        upload = uploadBytesResumable(elementRef, value)
         upload.then(() => {
           store.dispatch('getUrl',{storage,elementRef})
           .then(url => {
             console.log('url',url)
             state.loadingStatus = false
-            state.dataInfo.elementRef = elementRef
             state.dataInfo.url = url
             state.activeUpload = false
             state.uploadStatus = true
@@ -195,7 +188,7 @@ export default {
         state.activeUpload = false
         state.uploadStatus = false
         state.loadingStatus = false
-        console.log('errorType', file)
+        console.log('errorType', value)
       }
     }
     const deleteData = () => {
@@ -205,6 +198,7 @@ export default {
         state.uploadStatus = false
         state.dataInfo.url = ''
         state.dataInfo.elementRef = ''
+        store.commit('setElementRef',null)
       }
     }
     const dropData = (event, wasActiveInput) => {
@@ -275,6 +269,7 @@ export default {
 
     const cancelSendData = () => {
       upload.cancel()
+      store.commit('setElementRef',null)
       state.sendDataInfo = {}
       state.loadingStatus = false
       emit('activeUpload', false, state.sendDataInfo.type)
@@ -290,8 +285,6 @@ export default {
       recordingStartPathSvg,
       recordingStopPathSvg,
       validation,
-      conditionAudioResult,
-      conditionVideoResult
     }
   }
 }

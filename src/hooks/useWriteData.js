@@ -1,6 +1,7 @@
 import {getDatabase, ref, set} from "firebase/database";
 
 export const useWriteData = (path = '',content) => {
+    console.log(content)
     try {
         if (JSON.parse(localStorage.getItem('userData')).user.uid) {
             const db = getDatabase();

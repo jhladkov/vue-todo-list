@@ -90,6 +90,7 @@ export default {
 
     const remove = (id, deleteData) => {
       if (deleteData) {
+        console.log('delete data ', deleteData)
         const elementRef = ref(storage, deleteData);
         store.dispatch('removeDataFromDatabase', elementRef)
       }

@@ -28,7 +28,7 @@
               v-model.trim="state.inputText"
               :input-class="{
                 'error-message': v$.$error,
-                form__input: !v$.$error
+                form__input: true
               }"
           />
           <Select
@@ -95,6 +95,7 @@ export default {
         store.dispatch('changeStatusOpen')
         if (state.elementRef && deleteData) {
           store.dispatch('removeDataFromDatabase', state.elementRef)
+          store.commit('setElementRef',null)
         }
       }
     }

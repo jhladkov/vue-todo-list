@@ -3,10 +3,11 @@ import {modal} from "./modal";
 import {useWriteData} from "../hooks/useWriteData";
 import {useRemoveData} from "../hooks/useRemoveData";
 import {child, get, getDatabase, ref} from "firebase/database";
-import {getDownloadURL, uploadBytesResumable, ref as storageRef} from "firebase/storage";
+import {getDownloadURL, ref as storageRef} from "firebase/storage";
 
 export default createStore({
     state: {
+        elementRef: null,
         isAuth: false,
         userInfo: {},
         sections: [{id: Math.floor(Math.random() * 1000000), value: 'Все', notDelete: true}],
@@ -34,6 +35,9 @@ export default createStore({
 
     },
     mutations: {
+        setElementRef(state,payload) {
+            state.elementRef = payload
+        },
         setUserInfo(state, payload) {
             if (payload) {
                 state.userInfo = payload
@@ -68,11 +72,11 @@ export default createStore({
     actions: {
         getTodoFromDatabase({commit}, payload) {
             const dbRef = ref(getDatabase());
-            // const interval = setInterval(() => {
-            //     console.log(payload)
-            //     console.log('request again')
-            //     callRequest()
-            // }, 1000)
+            const interval = setInterval(() => {
+                console.log(payload)
+                console.log('request again')
+                callRequest()
+            }, 1000)
             const callRequest = () => {
                 get(child(dbRef, `${payload.uid}/${payload.path}`))
                     .then((snapshot) => {
@@ -90,7 +94,7 @@ export default createStore({
                         } else {
                             console.log("No data available");
                         }
-                        // clearInterval(interval)
+                        clearInterval(interval)
                     })
             }
             callRequest()
@@ -98,11 +102,11 @@ export default createStore({
         getSectionFromDatabase({commit}, payload) {
             const dbRef = ref(getDatabase());
 
-            // const interval = setInterval(() => {
-            //     console.log(payload)
-            //     console.log('request again')
-            //     callRequest()
-            // }, 5000)
+            const interval = setInterval(() => {
+                console.log(payload)
+                console.log('request again')
+                callRequest()
+            }, 1000)
             const callRequest = () => {
                 get(child(dbRef, `${payload.uid}/${payload.path}`)).then((snapshot) => {
                     commit('setLoading', true)
@@ -123,7 +127,7 @@ export default createStore({
                         }])
                         console.log("No data available");
                     }
-                    // clearInterval(interval)
+                    clearInterval(interval)
                 })
             }
             callRequest()
