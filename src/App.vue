@@ -74,7 +74,7 @@ export default {
       openWindow: false,
       globalModalOpen: store.state.modal.open,
       error: null,
-      uid: JSON.parse(localStorage.getItem('userData')).user.uid
+      uid: JSON.parse(localStorage.getItem('userData'))?.user?.uid
     })
 
     if (localStorage.getItem('userData')) {
@@ -122,16 +122,24 @@ export default {
     onMounted(() => {
       getDataTodo()
       getDataSection()
+      window.onbeforeunload = (e) => {
+        if(store.state.elementRef) {
+          store.dispatch('removeDataFromDatabase',store.state.elementRef)
+        }
+      }
     })
 
-   // window.onbeforeunload = (e) => {
-   //   console.log(e)
-   //    const ms = 'stooop!'
-   //    e.returnValue = ms
-   //    return ms
-   //  }
+    // window.onbeforeunload = (e) => {
+    //   console.log(e)
+    //    const ms = 'stooop!'
+    //    e.returnValue = ms
+    //    return ms
+    //  }
 
     watchEffect(() => {
+
+
+
       if (!state.sectionName) {
         state.error = true
       } else {

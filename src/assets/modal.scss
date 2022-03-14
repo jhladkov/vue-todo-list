@@ -27,7 +27,6 @@
     }
   }
 
-
   .modal__form {
     margin-top: 20px;
     display: flex;
@@ -51,6 +50,9 @@
 
   .modal__wrapper {
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 
     .modal__inner {
       display: flex;
@@ -171,5 +173,11 @@
 
   .img-wrapper__inner__button {
     margin-left: 20px;
+  }
+}
+.text{
+  margin-bottom: 35px;
+  svg{
+    max-width: 200px;
   }
 }

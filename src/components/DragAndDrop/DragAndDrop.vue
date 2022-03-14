@@ -88,11 +88,6 @@ export default {
     const storage = getStorage();
     const store = useStore()
     const state = reactive({
-      resultDragAndDropInfo: [
-        {class: 'img-wrapper', typeResult: 'image'},
-        {class: 'video-wrapper', typeResult: 'video'},
-        {class: 'audio-wrapper', typeResult: 'audio'},
-      ],
       uid: JSON.parse(localStorage.getItem('userData')).user.uid,
       stopRecording: false,
       itemsRecorder: [],
@@ -131,31 +126,32 @@ export default {
       return 'M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM10 10h4v12h-4zM18 10h4v12h-4z'
     })
     const validation = computed(() => {
-      if (
-          state.sendDataInfo.type === 'image/jpeg'
-          || state.sendDataInfo.type === 'image/png'
-          || state.sendDataInfo.type === 'image/webp'
-      ) {
-        return 'image'
+      switch (state.sendDataInfo.type) {
+        case 'image/jpeg':
+          return 'image'
+        case  'image/png':
+          return 'image'
+        case 'image/webp':
+          return 'image'
+        case 'video/mp4':
+          return 'video'
+        case  'audio/mpeg':
+          return 'audio'
+        case  'audio/ogg':
+          return 'audio'
+        case 'audio/webm':
+          return 'audio'
+        case 'text/plain':
+          return 'text'
+        default:
+          return null
       }
-
-      if (state.sendDataInfo.type === 'video/mp4') {
-        return 'video'
-      }
-      if (
-          state.sendDataInfo.type === 'audio/mpeg'
-          || state.sendDataInfo.type === 'audio/ogg'
-          || state.sendDataInfo.type === 'audio/webm'
-      ) {
-        return 'audio'
-      }
-
-      return null
     })
 
     let upload;
 
     const sendDataToStorage = (value, isBlob) => {
+
       if (isBlob) {
         emit('activeUpload', true, 'audio/webm')
       }
@@ -166,6 +162,7 @@ export default {
       const elementRef = ref(storage, `${state.uid}/${state.sendDataInfo.name}`);
       store.commit('setElementRef',elementRef)
       state.dataInfo.elementRef = elementRef
+      console.log('elementRefStorage',elementRef)
       console.log('elemRef', elementRef)
       console.log('state.sendDataInfo.name', state.sendDataInfo.name)
 
@@ -188,7 +185,8 @@ export default {
         state.activeUpload = false
         state.uploadStatus = false
         state.loadingStatus = false
-        console.log('errorType', value)
+        emit('activeUpload', state.activeUpload, value.type)
+        alert('Данный тип не потдерживаеться')
       }
     }
     const deleteData = () => {
@@ -265,6 +263,13 @@ export default {
           .catch(err => {
             alert('Вы запретили или не разрешили использовать микрофон')
           })
+    }
+
+    window.onbeforeunload = (e) => {
+      if(store.state.elementRef) {
+        upload.cancel()
+        store.dispatch('removeDataFromDatabase',store.state.elementRef)
+      }
     }
 
     const cancelSendData = () => {

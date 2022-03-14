@@ -95,7 +95,7 @@ export default {
         store.dispatch('changeStatusOpen')
         if (state.elementRef && deleteData) {
           store.dispatch('removeDataFromDatabase', state.elementRef)
-          store.commit('setElementRef',null)
+          store.commit('setElementRef', null)
         }
       }
     }
@@ -115,32 +115,38 @@ export default {
     }
 
     const setElementRef = (value) => {
-        state.elementRef = value
+      state.elementRef = value
+    }
+
+    const prepareToCreateTodo = () => {
+      const obj = useObjectTodo(
+          state.section,
+          1,
+          'todo',
+          state.inputText,
+          state.storageData.url,
+          state.storageData.type,
+          Math.floor(Math.random() * 1000000)
+      )
+
+      store.dispatch('writeDataInDatabase', {
+        path: 'todo',
+        value: {data: [...store.state.modal.todos, obj]}
+      })
+
+      store.commit('setTodos', [...store.state.modal.todos, obj])
+      closeModel(false)
+      state.inputText = ''
+      state.storageData.url = ''
+      store.commit('setElementRef',null)
     }
 
     const createTodo = () => {
-      if (!v$.value.$error && !state.activeUpload) {
-        const obj = useObjectTodo(
-            state.section,
-            1,
-            'todo',
-            state.inputText,
-            state.storageData.url,
-            state.storageData.type,
-            Math.floor(Math.random() * 1000000)
-        )
-
-        store.dispatch('writeDataInDatabase', {
-          path: 'todo',
-          value: {data: [...store.state.modal.todos, obj]}
-        })
-
-        store.commit('setTodos', [...store.state.modal.todos, obj])
-        closeModel(false)
-        state.inputText = ''
-        state.storageData.url = ''
-      } else {
-        console.log('error', v$.value.$error)
+      if (state.elementRef && !state.activeUpload) {
+        prepareToCreateTodo()
+      }
+      else if (!v$.value.$error && !state.activeUpload) {
+        prepareToCreateTodo()
       }
     }
 
