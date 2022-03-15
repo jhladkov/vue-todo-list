@@ -4,6 +4,7 @@
       :class="selectClasses"
   >
     <p
+        ref="select"
         @click="activeSelect"
         id="select__title"
         class="select__title"
@@ -25,7 +26,7 @@
           <p>{{ option.value }}</p>
         </div>
         <div
-            v-if="!option.notDelete && possibilityToDelete"
+            v-if="possibilityToDelete && index !== 0"
             @click.stop="removeSection(option.id,option.value,index)"
             class="option-select__select delete"
         >
@@ -43,7 +44,7 @@
 </template>
 
 <script>
-import {computed, reactive} from "vue";
+import {computed, onBeforeUnmount, onMounted, reactive, ref} from "vue";
 
 export default {
   name: 'Select',
@@ -67,6 +68,8 @@ export default {
     }
   },
   setup(props, {emit}) {
+    const select = ref(null)
+
     const state = reactive({
       selected: props.defaultSelectedValue,
       open: false,
@@ -83,18 +86,37 @@ export default {
       state.open = false
       emit('selectedOption', value)
     }
+
+    const documentHandel = (status) => {
+      if (status) {
+        document.addEventListener('click', hideSelect)
+      } else {
+        hideSelect()
+        document.removeEventListener('click', hideSelect)
+      }
+    }
+
     const activeSelect = () => {
       state.open = !state.open
+      documentHandel(state.open)
+    }
+    const hideSelect = (event) => {
+      if (event?.target !== select.value) {
+        state.open = false
+        document.removeEventListener('click', hideSelect)
+      }
     }
 
     const removeSection = (id, value, index) => {
+      const previousValue = props.options[--index].value
       emit('removeSection', id, value)
-      state.selected = props.options[--index].value
+      emit('selectedOption', previousValue)
+      state.open = false
+      state.selected = previousValue
     }
 
-
     return {
-      state, selectOption, activeSelect, removeSection, selectClasses
+      state, selectOption, activeSelect, removeSection, selectClasses, select
     }
   }
 }

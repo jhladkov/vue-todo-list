@@ -59,7 +59,7 @@ export default {
     }
     const setSelectedOptionInStore = (value) => {
       if (value) {
-        store.dispatch('changeSelectedOption', value)
+        store.commit('setSelectedOption',value)
       }
     }
     const removeSection = (id, sectionName) => {
@@ -67,11 +67,13 @@ export default {
       const filterTodos = store.state.modal.todos.filter(item => {
         const elementRef = ref(storage, item.storageInfo.url);
 
-        if (item.storageInfo.url) {
+        if (item.storageInfo.url && item.section === sectionName) {
           store.dispatch('removeDataFromDatabase',elementRef)
         }
+        console.log('sectionNAme',sectionName)
         return item.section !== sectionName
       })
+      console.log(filterTodos)
       store.dispatch('changeSection', filterSection)
       store.dispatch('changeTodosArr', filterTodos)
       store.dispatch('writeDataInDatabase', {

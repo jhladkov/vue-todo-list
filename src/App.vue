@@ -18,7 +18,7 @@
     <ReusableWindow
         v-if="state.openWindow"
         title="Создать секцию"
-        @closeWindow="state.openWindow = false"
+        @closeReusableWindow="state.openWindow = false"
     >
       <Form
           @submit.prevent="addSection"
@@ -26,12 +26,13 @@
       >
         <Input
             v-focus
-            :input-class="`window__input input ${!state.error ? '' : 'error-message'}`"
-            placeholder="Название секции" v-model.trim="state.sectionName"
+            :input-class="{'window__input': true, 'error-message': state.error}"
+            placeholder="Название секции"
+            v-model.trim="state.sectionName"
         />
         <Button
             button-type="submit"
-            item-class="window__add-section button"
+            item-class="window__add-section"
             text="Добавть секцию"
         />
       </Form>
@@ -105,7 +106,10 @@ export default {
     }
 
     const addSection = () => {
-      if (state.sectionName) {
+
+      const valid = [...store.state.sections].some(item => item.value === state.sectionName)
+
+      if (state.sectionName && !valid) {
         store.dispatch('changeSection', [...store.state.sections, {
           id: Math.floor(Math.random() * 1000000),
           value: state.sectionName
@@ -116,6 +120,8 @@ export default {
           path: 'sections',
           value: {data: store.state.sections},
         })
+      } else {
+        alert('Такое название уже существует или вы ничего не ввели!')
       }
     }
 
@@ -123,23 +129,13 @@ export default {
       getDataTodo()
       getDataSection()
       window.onbeforeunload = (e) => {
-        if(store.state.elementRef) {
-          store.dispatch('removeDataFromDatabase',store.state.elementRef)
+        if (store.state.elementRef) {
+          store.dispatch('removeDataFromDatabase', store.state.elementRef)
         }
       }
     })
 
-    // window.onbeforeunload = (e) => {
-    //   console.log(e)
-    //    const ms = 'stooop!'
-    //    e.returnValue = ms
-    //    return ms
-    //  }
-
     watchEffect(() => {
-
-
-
       if (!state.sectionName) {
         state.error = true
       } else {

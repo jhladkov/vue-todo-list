@@ -164,9 +164,6 @@ export default createStore({
         changeLoadingStatus({commit}, payload) {
             commit('setLoading', payload)
         },
-        changeSelectedOption({commit}, payload) {
-            commit('setSelectedOption', payload)
-        },
         changeSection({commit}, payload) {
             commit('setSections', payload)
         },

@@ -145,7 +145,7 @@ export default {
       if (state.elementRef && !state.activeUpload) {
         prepareToCreateTodo()
       }
-      else if (!v$.value.$error && !state.activeUpload) {
+      else if (!v$.value.$invalid && !v$.value.$error && !state.activeUpload) {
         prepareToCreateTodo()
       }
     }
