@@ -17,6 +17,38 @@
   }
 }
 @media (max-width: 550px) {
+  .modal{
+    .modal__form{
+      .form__inner{
+        width: 100%;
+        flex-direction: column-reverse;
+        align-items: flex-start;
+        .form__input{
+          width: 100%;
+        }
+        .form__select{
+          width: 100%;
+          margin-bottom: 10px;
+        }
+      }
+      button{
+        width: 100%;
+      }
+    }
+    .modal__wrapper {
+      .modal__drag{
+        .drag-area-info{
+          flex-direction: column;
+          align-items: center;
+          .img-wrapper__inner{
+            padding-top: 0;
+            margin-bottom: 20px;
+          }
+        }
+      }
+    }
+  }
+
   .header{
     .account{
       flex-direction: column;
