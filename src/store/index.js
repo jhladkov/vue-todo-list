@@ -1,16 +1,43 @@
 import {createStore} from 'vuex'
 import {modal} from "./modal";
+import {useWriteData} from "../hooks/useWriteData";
+import {useRemoveData} from "../hooks/useRemoveData";
+import {child, get, getDatabase, ref} from "firebase/database";
+import {getDownloadURL, ref as storageRef} from "firebase/storage";
 
 export default createStore({
     state: {
+        elementRef: null,
         isAuth: false,
         userInfo: {},
         sections: [{id: Math.floor(Math.random() * 1000000), value: 'Все', notDelete: true}],
         isLoaded: false,
         selectedOption: 'Все',
     },
+    getters: {
+        getFilterTodosByDone(state) {
+            return state.modal.todos.filter(item => item.type === 'done')
+        },
+        getFilterTodosByTodo(state) {
+            return state.modal.todos.filter(item => item.type === 'todo')
+        },
+        getFilterTodosBySortPriority(state) {
+            const comparePriority = (a, b) => {
+                return b.priority - a.priority
+            }
+            return state.modal.todos.filter(item => item.type === 'todo').sort(comparePriority)
+        },
+        getTodosBySelectedOption(state) {
+            return (value) => {
+                return value.filter(item => item.section === state.selectedOption)
+            }
+        },
 
+    },
     mutations: {
+        setElementRef(state,payload) {
+            state.elementRef = payload
+        },
         setUserInfo(state, payload) {
             if (payload) {
                 state.userInfo = payload
@@ -37,13 +64,98 @@ export default createStore({
         },
         setSections(state, payload) {
             state.sections = payload
+        },
+        setPermissions(state, payload) {
+            state.permissions = payload
         }
     },
     actions: {
+        getTodoFromDatabase({commit}, payload) {
+            const dbRef = ref(getDatabase());
+            const interval = setInterval(() => {
+                console.log(payload)
+                console.log('request again')
+                callRequest()
+            }, 1000)
+            const callRequest = () => {
+                get(child(dbRef, `${payload.uid}/${payload.path}`))
+                    .then((snapshot) => {
+                        commit('setLoading', true)
+
+                        if (snapshot.exists()) {
+                            const data = snapshot.val().data
+                            if (data) {
+                                console.log(data)
+                                commit('setTodos', data)
+                            } else {
+                                console.log('request Todo!')
+                                callRequest()
+                            }
+                        } else {
+                            console.log("No data available");
+                        }
+                        clearInterval(interval)
+                    })
+            }
+            callRequest()
+        },
+        getSectionFromDatabase({commit}, payload) {
+            const dbRef = ref(getDatabase());
+
+            const interval = setInterval(() => {
+                console.log(payload)
+                console.log('request again')
+                callRequest()
+            }, 1000)
+            const callRequest = () => {
+                get(child(dbRef, `${payload.uid}/${payload.path}`)).then((snapshot) => {
+                    commit('setLoading', true)
+
+                    if (snapshot.exists()) {
+                        const data = snapshot.val().data
+                        if (data) {
+                            commit('setSections', data)
+                        } else {
+                            console.log('request Section')
+                            callRequest()
+                        }
+                    } else {
+                        commit('setSections', [{
+                            id: Math.floor(Math.random() * 1000000),
+                            value: 'Все',
+                            notDelete: true
+                        }])
+                        console.log("No data available");
+                    }
+                    clearInterval(interval)
+                })
+            }
+            callRequest()
+        },
+
+      async getUrl({commit}, {storage, elementRef}) {
+        return  await getDownloadURL(storageRef(storage, elementRef))
+                .then((url) => {
+                    if (url) {
+                        return url
+                    }
+                })
+                .catch((error) => {
+                    console.log('error', error)
+                });
+
+        },
+
+        writeDataInDatabase({state, commit}, obj) {
+            useWriteData(obj.path, obj.value) // write and change any data in the database
+        },
+        removeDataFromDatabase({commit}, payload) {
+            useRemoveData(payload)
+        },
         changeAuthStatus({state, commit}, payload) {
             commit('setUserInfo', payload)
         },
-        resetState({state, commit}) {
+        resetState({commit}) {
             commit('resetState')
         },
         changeTodo({commit}, payload) {
@@ -52,11 +164,11 @@ export default createStore({
         changeLoadingStatus({commit}, payload) {
             commit('setLoading', payload)
         },
-        changeSelectedOption({commit}, payload) {
-            commit('setSelectedOption', payload)
-        },
         changeSection({commit}, payload) {
             commit('setSections', payload)
+        },
+        changePermission({commit}, obj) {
+            commit('setPermissions', obj)
         }
     },
     modules: {

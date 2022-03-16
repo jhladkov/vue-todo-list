@@ -6,6 +6,7 @@
     min-width: 250px;
   }
   .control-panel__wrapper{
+    flex-wrap: wrap;
     align-items: center;
     display: flex;
     .control-panel__inner{

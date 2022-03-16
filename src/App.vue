@@ -3,43 +3,44 @@
     <Header/>
     <div class="main-wrapper">
       <Container>
-        <Section v-if="state.isAuth" section-class="section control-panel">
-          <div class="control-panel__wrapper">
-            <div class="control-panel__inner">
-              <Button @click="openModel" text="Добавить задачу" item-class="control-panel__add-task button"/>
-            </div>
-            <div class="control-panel__inner">
-              <Button @click="state.openWindow = true" text="Добавить секцию"
-                      item-class="control-panel__add-task button"/>
-            </div>
-            <Select
-                @selectedOption="setSelectedOptionInStore"
-                @removeSection="removeSection"
-                className="control-panel__select"
-                typeOpen="bottom"
-                text="Секция: "
-                :options="state.options"
-            />
-          </div>
-
-
-        </Section>
+        <ControlPanel
+            :is-auth="state.isAuth"
+            :select-options="state.options"
+            @openSectionModal="state.openWindow = true"
+        />
         <router-view/>
         <div v-if="!state.isLoaded">
           <Loader/>
           <Background/>
         </div>
-
       </Container>
     </div>
-    <ReusableWindow v-if="state.openWindow" title="Создать секцию" @closeWindow="state.openWindow = false">
-      <Form @submit.prevent="addSection" form-class="window__form">
-        <Input v-focus :input-class="`window__input input ${!state.error ? '' : 'error-message'}`"
-               placeholder="Название секции" v-model.trim="state.sectionName"/>
-        <Button button-type="submit" item-class="window__add-section button" text="Добавть секцию"/>
+    <ReusableWindow
+        v-if="state.openWindow"
+        title="Создать секцию"
+        @closeReusableWindow="state.openWindow = false"
+    >
+      <Form
+          @submit.prevent="addSection"
+          form-class="window__form"
+      >
+        <Input
+            v-focus
+            :input-class="{'window__input': true, 'error-message': state.error}"
+            placeholder="Название секции"
+            v-model.trim="state.sectionName"
+        />
+        <Button
+            button-type="submit"
+            item-class="window__add-section"
+            text="Добавть секцию"
+        />
       </Form>
     </ReusableWindow>
-    <Modal v-if="this.$store.state.modal.open" title="Добавить задачу"/>
+    <Modal
+        v-if="state.globalModalOpen"
+        title="Добавить задачу"
+    />
   </main>
 </template>
 
@@ -48,61 +49,91 @@
 </style>
 <script>
 import Header from "./components/Header/Header";
-import Modal from "./components/Modal";
+
 import {useStore} from "vuex";
-import {reactive, watchEffect} from "vue";
-import {useWriteData} from "./hooks/useWriteData";
+import {defineAsyncComponent, onMounted, reactive, watchEffect} from "vue";
 import Form from "./components/Form/Form";
 import Select from "./UI/Select";
-
+import ControlPanel from "./components/ControlPanel/ControlPanel";
 
 
 export default {
-  components: {Select, Form, Modal, Header},
+  components: {
+    ControlPanel,
+    Select,
+    Form,
+    Modal: defineAsyncComponent(() => import ("./components/Modal")),
+    Header
+  },
   setup() {
     const store = useStore()
     const state = reactive({
       isLoaded: store.state.isLoaded,
       isAuth: store.state.isAuth,
-      options: store.state?.sections,
+      options: store.state.sections,
       sectionName: '',
       openWindow: false,
+      globalModalOpen: store.state.modal.open,
       error: null,
+      uid: JSON.parse(localStorage.getItem('userData'))?.user?.uid
     })
 
     if (localStorage.getItem('userData')) {
       const data = JSON.parse(localStorage.getItem('userData'))
       store.dispatch('changeAuthStatus', data)
     }
-    const openModel = () => {
-      store.dispatch('changeStatusOpen')
+
+    const getDataTodo = async () => {
+      try {
+        await store.dispatch('getTodoFromDatabase', {
+          path: 'todo',
+          uid: state.uid,
+        })
+      } catch (err) {
+        console.log(err)
+      }
     }
-    const setSelectedOptionInStore = (value) => {
-      if (value) {
-        store.dispatch('changeSelectedOption', value)
+
+    const getDataSection = async () => {
+      try {
+        await store.dispatch('getSectionFromDatabase', {
+          path: 'sections',
+          uid: state.uid
+        })
+      } catch (err) {
+        console.log(err)
       }
     }
 
     const addSection = () => {
-      if (state.sectionName) {
+
+      const valid = [...store.state.sections].some(item => item.value === state.sectionName)
+
+      if (state.sectionName && !valid) {
         store.dispatch('changeSection', [...store.state.sections, {
           id: Math.floor(Math.random() * 1000000),
           value: state.sectionName
         }])
         state.openWindow = false
         state.sectionName = ''
-        useWriteData('sections', {data: store.state.sections})
+        store.dispatch('writeDataInDatabase', {
+          path: 'sections',
+          value: {data: store.state.sections},
+        })
+      } else {
+        alert('Такое название уже существует или вы ничего не ввели!')
       }
     }
 
-    const removeSection = (id,sectionName) => {
-      const filterSection = store.state.sections.filter(item => item.id !== id)
-      const filterTodos = store.state.modal.todos.filter(item => item.section !== sectionName)
-      store.dispatch('changeSection', filterSection)
-      store.dispatch('changeTodosArr',filterTodos)
-      useWriteData('sections',{data: filterSection})
-      useWriteData('todo',{data: filterTodos})
-    }
+    onMounted(() => {
+      getDataTodo()
+      getDataSection()
+      window.onbeforeunload = (e) => {
+        if (store.state.elementRef) {
+          store.dispatch('removeDataFromDatabase', store.state.elementRef)
+        }
+      }
+    })
 
     watchEffect(() => {
       if (!state.sectionName) {
@@ -112,11 +143,12 @@ export default {
       }
       state.isLoaded = store.state.isLoaded
       state.isAuth = store.state.isAuth
+      state.globalModalOpen = store.state.modal.open
       state.options = store.state.sections
     })
 
     return {
-      state, openModel, setSelectedOptionInStore, addSection, removeSection
+      state, addSection
     }
   }
 }

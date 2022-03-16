@@ -1,5 +1,10 @@
 <template>
-  <button :type="buttonType" :class="itemClass" >{{text}}</button>
+  <button
+      :type="buttonType"
+      type="button"
+      :class="itemClass"
+      class="button"
+  >{{text}}</button>
 </template>
 
 <script>
@@ -12,11 +17,9 @@ export default {
     },
     itemClass: {
       type: String,
-      default: 'button'
     },
     buttonType: {
       type: String,
-      default: 'button'
     }
   },
 }

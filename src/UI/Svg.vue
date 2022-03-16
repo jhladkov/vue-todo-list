@@ -1,5 +1,8 @@
 <template>
-  <svg :class="classSvg" :viewBox="viewBox">
+  <svg
+      :class="classSvg"
+      :viewBox="viewBox"
+  >
     <path :d="path"></path>
   </svg>
 </template>

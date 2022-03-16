@@ -1,4 +1,5 @@
 .panel {
+  margin-bottom: 50px;
   .panel-todo__title,.panel-done__title {
     margin-bottom: 20px;
   }
@@ -32,28 +33,30 @@
       padding: 0 0 30px 0;
       margin-bottom: 20px;
 
+      .item__panel-task{
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        a{
+          margin-right: 20px;
+        }
+      }
+
       .info-wrapper__inner{
         margin-bottom: 20px;
         word-break: break-word;
         max-width: 500px;
       }
 
+      .info-wrapper__text{
+        margin-bottom: 10px;
+        svg{
+          max-width: 70px;
+        }
+      }
+
       .info-wrapper__img{
         position: relative;
-        .info-wrapper__panel{
-          opacity: 0;
-          display: flex;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%,-50%);
-          transition: all .3s;
-        }
-        &:hover{
-          .info-wrapper__panel{
-            opacity: 1;
-          }
-        }
       }
 
 

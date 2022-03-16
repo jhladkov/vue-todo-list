@@ -1,9 +1,8 @@
 <template>
-  <div @click="login" class="login__item item">
-<!--    <Svg :path="path"-->
-<!--         :viewBox="viewBox"-->
-<!--         :classSvg="classSvg"-->
-<!--    />-->
+  <div
+      @click="login"
+      class="login__item item"
+  >
     <p>Продолжить через {{ title }}</p>
   </div>
 </template>
@@ -39,7 +38,7 @@ export default {
 
     const login = () => {
       signInWithPopup(auth, provider)
-          .then((result) => {
+          .then(async (result) => {
             if (result) {
               const credential = GoogleAuthProvider.credentialFromResult(result);
               const token = credential.accessToken;
@@ -49,6 +48,15 @@ export default {
 
               localStorage.setItem('userData', JSON.stringify(obj))
               store.dispatch('changeAuthStatus', obj)
+
+             await store.dispatch('getTodoFromDatabase', {
+                path: 'todo',
+                uid: obj?.user?.uid,
+              })
+             await store.dispatch('getSectionFromDatabase',{
+               path: 'sections',
+               uid: obj?.user?.uid,
+             })
 
               router.push('/')
 

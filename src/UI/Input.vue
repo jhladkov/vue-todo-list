@@ -1,15 +1,16 @@
 <template>
   <input v-if="inputType !== 'file'"
-      :type="inputType"
-      :class="inputClass"
-      :placeholder="placeholder"
-      :value="modelValue"
-      @input="emitChange"
+         :type="inputType"
+         :class="inputClass"
+         class="input"
+         :placeholder="placeholder"
+         :value="modelValue"
+         @input="emitChange"
   >
   <div v-else class="input-wrapper">
     <label>
       <input @input="emitChange" type="file" id="file" :placeholder="placeholder" :class="inputClass">
-        {{placeholder}}
+      {{ placeholder }}
     </label>
   </div>
 
@@ -28,20 +29,19 @@ export default {
       default: 'text'
     },
     inputClass: {
-      type: String,
-      default: 'input'
+      type: Object,
     },
     placeholder: {
       type: String,
       default: 'Введите данные'
     }
   },
-  setup(props,{emit}) {
+  setup(props, {emit}) {
     const emitChange = (event) => {
       if (props.inputType === 'file') {
 
-        emit('getFile',event.target.files['0'],true)
-      }else {
+        emit('getFile', event.target.files['0'], true)
+      } else {
         emit('update:modelValue', event.target.value)
       }
     }

@@ -1,24 +1,46 @@
 <template>
-  <Section section-class="section modal">
+  <Section section-class="modal">
     <div class="modal__wrapper">
       <div class="modal__header">
-        <Title title-class="modal__title" :title="title"/>
-        <div @click="closeModel" class="modal__close">&times;</div>
+        <Title
+            title-class="modal__title"
+            :title="title"
+        />
+        <div
+            @click="closeModel"
+            class="modal__close"
+        >&times;
+        </div>
       </div>
-      <DragAndDrop @getUrlImg="getImg" @activeUpload="activeUpload" @removeElementRef="setElementRef"/>
-      <Form @submit.prevent="createTodo" form-class="modal__form form">
+      <DragAndDrop
+          @getUrlImg="getImg"
+          @activeUpload="activeUpload"
+          @removeElementRef="setElementRef"
+      />
+      <Form
+          @submit.prevent="createTodo"
+          form-class="modal__form form"
+      >
         <div class="form__inner">
           <Input
               v-focus
               @blur="v$.inputText.$touch"
               v-model.trim="state.inputText"
-              :input-class="v$.$error ? 'form__input input error-message' : 'form__input input' "
-
+              :input-class="{
+                'error-message': v$.$error,
+                form__input: true
+              }"
           />
-          <Select text="Секция: " @selectedOption="setSection" className="form__select" typeOpen="top" :options="state.options"/>
+          <Select
+              text="Секция: "
+              @selectedOption="setSection"
+              className="form__select"
+              typeOpen="top"
+              :options="state.options"
+          />
         </div>
         <Button
-            item-class="form__button button"
+            item-class="form__button"
             text="Добавить задачу"
             button-type="submit"
         />
@@ -32,13 +54,11 @@
 <script>
 import {useStore} from "vuex";
 import Form from "./Form/Form";
-import {reactive, watchEffect} from "vue";
+import {reactive} from "vue";
 import useVuelidate from '@vuelidate/core'
 import {required} from '@vuelidate/validators'
 import {useObjectTodo} from "../hooks/useObjectTodo";
-import {useWriteData} from "../hooks/useWriteData";
 import DragAndDrop from "./DragAndDrop/DragAndDrop";
-import {useRemoveData} from "../hooks/useRemoveData";
 import Select from "../UI/Select";
 
 
@@ -74,7 +94,8 @@ export default {
       if (!state.activeUpload) {
         store.dispatch('changeStatusOpen')
         if (state.elementRef && deleteData) {
-          useRemoveData(state.elementRef)
+          store.dispatch('removeDataFromDatabase', state.elementRef)
+          store.commit('setElementRef', null)
         }
       }
     }
@@ -94,32 +115,50 @@ export default {
     }
 
     const setElementRef = (value) => {
-      if (value) {
-        state.elementRef = value
-      }
+      state.elementRef = value
+    }
+
+    const prepareToCreateTodo = () => {
+      const obj = useObjectTodo(
+          state.section,
+          1,
+          'todo',
+          state.inputText,
+          state.storageData.url,
+          state.storageData.type,
+          Math.floor(Math.random() * 1000000)
+      )
+
+      store.dispatch('writeDataInDatabase', {
+        path: 'todo',
+        value: {data: [...store.state.modal.todos, obj]}
+      })
+
+      store.commit('setTodos', [...store.state.modal.todos, obj])
+      closeModel(false)
+      state.inputText = ''
+      state.storageData.url = ''
+      store.commit('setElementRef',null)
     }
 
     const createTodo = () => {
-      if (!v$.value.$error && !state.activeUpload) {
-        const obj = useObjectTodo(state.section,1, 'todo', state.inputText, state.storageData.url, state.storageData.type, Math.floor(Math.random() * 1000000))
-
-        useWriteData('todo',{data: [...store.state.modal.todos, obj] })
-
-        store.dispatch('changeTodosArr', [...store.state.modal.todos, obj])
-        closeModel(false)
-        state.inputText = ''
-        state.storageData.url = ''
-      } else {
-        console.log('error', v$.value.$error)
+      if (state.elementRef && !state.activeUpload) {
+        prepareToCreateTodo()
+      }
+      else if (!v$.value.$invalid && !v$.value.$error && !state.activeUpload) {
+        prepareToCreateTodo()
       }
     }
 
-    watchEffect(() => {
-      state.options = store.state.sections
-    })
-
     return {
-      closeModel, state, v$, createTodo, getImg, activeUpload, setElementRef, setSection
+      closeModel,
+      state,
+      v$,
+      createTodo,
+      getImg,
+      activeUpload,
+      setElementRef,
+      setSection
     }
   }
 }
