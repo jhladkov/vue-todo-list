@@ -13,14 +13,14 @@
         title-class="panel-todo__title"
         typePanel="todo"
     >
-      <Select
-          default-selected-value="По приоритету"
-          :possibility-to-delete="false"
-          type-open="bottom"
-          class-name="panel-todo__filter-select"
-          :options="state.options"
-          text="Фильтровать: "
-      />
+<!--      <Select-->
+<!--          default-selected-value="По приоритету"-->
+<!--          :possibility-to-delete="false"-->
+<!--          type-open="bottom"-->
+<!--          class-name="panel-todo__filter-select"-->
+<!--          :options="state.options"-->
+<!--          text="Фильтровать: "-->
+<!--      />-->
     </Panel>
     <Panel
         :done="state.done"

@@ -4,8 +4,8 @@
       :class="className"
   >
     <video v-if="typeResult === 'video'" :src="url" controls></video>
-    <audio v-if="typeResult === 'audio'" :src="url" controls></audio>
-    <img v-if="typeResult === 'image'" :src="url" alt="">
+    <audio v-else-if="typeResult === 'audio'" :src="url" controls></audio>
+    <img v-else-if="typeResult === 'image'" :src="url" alt="">
     <svg
         v-else
         :class="typeResult"
