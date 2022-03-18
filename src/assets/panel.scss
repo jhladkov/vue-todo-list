@@ -33,6 +33,19 @@
       padding: 0 0 30px 0;
       margin-bottom: 20px;
 
+      .item__header{
+        display: flex;
+        color: darkgray;
+        margin-bottom: 10px;
+        p{
+          font-size: 12px;
+          margin-right: 50px;
+          &:last-child{
+            margin-right: 0;
+          }
+        }
+      }
+
       .item__panel-task{
         display: flex;
         align-items: center;

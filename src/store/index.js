@@ -35,7 +35,7 @@ export default createStore({
 
     },
     mutations: {
-        setElementRef(state,payload) {
+        setElementRef(state, payload) {
             state.elementRef = payload
         },
         setUserInfo(state, payload) {
@@ -73,8 +73,6 @@ export default createStore({
         getTodoFromDatabase({commit}, payload) {
             const dbRef = ref(getDatabase());
             const interval = setInterval(() => {
-                console.log(payload)
-                console.log('request again')
                 callRequest()
             }, 1000)
             const callRequest = () => {
@@ -85,10 +83,8 @@ export default createStore({
                         if (snapshot.exists()) {
                             const data = snapshot.val().data
                             if (data) {
-                                console.log(data)
                                 commit('setTodos', data)
                             } else {
-                                console.log('request Todo!')
                                 callRequest()
                             }
                         } else {
@@ -103,8 +99,6 @@ export default createStore({
             const dbRef = ref(getDatabase());
 
             const interval = setInterval(() => {
-                console.log(payload)
-                console.log('request again')
                 callRequest()
             }, 1000)
             const callRequest = () => {
@@ -133,8 +127,8 @@ export default createStore({
             callRequest()
         },
 
-      async getUrl({commit}, {storage, elementRef}) {
-        return  await getDownloadURL(storageRef(storage, elementRef))
+        async getUrl({commit}, {storage, elementRef}) {
+            return await getDownloadURL(storageRef(storage, elementRef))
                 .then((url) => {
                     if (url) {
                         return url

@@ -39,7 +39,6 @@ export default {
   setup(props,{emit}) {
 
     const change = (event, wasActiveInput) => {
-      console.log(event,wasActiveInput)
       emit('dropData',event, wasActiveInput)
     }
     const remove = () => {

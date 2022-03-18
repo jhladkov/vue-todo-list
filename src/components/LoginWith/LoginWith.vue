@@ -67,11 +67,6 @@ export default {
         const errorMessage = error.message;
         const email = error.email;
         const credential = GoogleAuthProvider.credentialFromError(error);
-        // ...
-        console.log('errorCode', errorCode)
-        console.log('errorMessage', errorMessage)
-        console.log('email', email)
-        console.log('credential', credential)
       });
     }
 

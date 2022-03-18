@@ -80,7 +80,6 @@ export default {
       } else {
         arr[index].type = 'done'
       }
-      console.log(arr)
       store.dispatch('changeTodosArr', arr)
       store.dispatch('writeDataInDatabase', {
         path: 'todo',
@@ -90,7 +89,6 @@ export default {
 
     const remove = (id, deleteData) => {
       if (deleteData) {
-        console.log('delete data ', deleteData)
         const elementRef = ref(storage, deleteData);
         store.dispatch('removeDataFromDatabase', elementRef)
       }
@@ -104,7 +102,6 @@ export default {
 
     const changeTypeByDragAndDrop = (value, type, typePanel) => {
       if (type === 'drop') {
-        console.log('drop', value, type, typePanel)
         if (state.dragInfo.id && state.dragInfo.typePanel !== typePanel) {
           const changedArr = state.allTodos.map(item => {
             if (item.id === state.dragInfo.id) {

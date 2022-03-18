@@ -13,12 +13,20 @@
           class="drag-area__loader"
       >
         <Loader/>
+        <div class="drag-area__progress-bar progress-bar">
+          <div
+              :style="{width: state.progressStatus + '%'}"
+              class="progress-bar__line"
+          ></div>
+        </div>
         <Button
             @click="cancelSendData"
             item-class="drag-area__button remove"
             text="Отменить загрузку"
         />
       </div>
+
+
       <div
           v-else
           class="drag-area-info"
@@ -77,7 +85,7 @@
 
 <script>
 import {reactive, computed} from "vue";
-import {getStorage, ref,uploadBytesResumable} from "firebase/storage";
+import {getStorage, ref, uploadBytesResumable} from "firebase/storage";
 import DragAndDropResult from "../DragAndDropResult/DragAndDropResult";
 import Svg from "../../UI/Svg";
 import {useStore} from "vuex";
@@ -108,12 +116,14 @@ export default {
         'image/webp',
         'audio/ogg',
         'audio/webm',
+        'application/pdf',
       ],
       dataInfo: {
         url: '',
         elementRef: ''
       },
-      file: null
+      file: null,
+      progressStatus: 0
     })
 
     const dragClass = computed(() => {
@@ -143,6 +153,8 @@ export default {
           return 'audio'
         case 'text/plain':
           return 'text'
+        case 'application/pdf':
+          return 'text'
         default:
           return null
       }
@@ -158,28 +170,30 @@ export default {
       state.activeUpload = true
       state.loadingStatus = true
 
-      console.log('filesend', value)
       const elementRef = ref(storage, `${state.uid}/${state.sendDataInfo.name}`);
-      store.commit('setElementRef',elementRef)
+      store.commit('setElementRef', elementRef)
       state.dataInfo.elementRef = elementRef
-      console.log('elementRefStorage',elementRef)
-      console.log('elemRef', elementRef)
-      console.log('state.sendDataInfo.name', state.sendDataInfo.name)
 
       if (Object.values(state.validType).includes(value.type) || isBlob) {
         emit('removeElementRef', elementRef)
         upload = uploadBytesResumable(elementRef, value)
+        console.log(upload.snapshot)
+
+        const int = setInterval(() => {
+          state.progressStatus = Math.round(upload.snapshot.bytesTransferred * 100) / upload.snapshot.totalBytes
+        }, 100)
+
         upload.then(() => {
-          store.dispatch('getUrl',{storage,elementRef})
-          .then(url => {
-            console.log('url',url)
-            state.loadingStatus = false
-            state.dataInfo.url = url
-            state.activeUpload = false
-            state.uploadStatus = true
-            emit('activeUpload', state.activeUpload, value.type)
-            emit('getUrl', url,value.name)
-          })
+          store.dispatch('getUrl', {storage, elementRef})
+              .then(url => {
+                state.loadingStatus = false
+                state.dataInfo.url = url
+                state.activeUpload = false
+                state.uploadStatus = true
+                emit('activeUpload', state.activeUpload, value.type)
+                emit('getUrl', url, value.name)
+                clearInterval(int)
+              })
         })
       } else {
         state.activeUpload = false
@@ -196,7 +210,7 @@ export default {
         state.uploadStatus = false
         state.dataInfo.url = ''
         state.dataInfo.elementRef = ''
-        store.commit('setElementRef',null)
+        store.commit('setElementRef', null)
       }
     }
     const dropData = (event, wasActiveInput) => {
@@ -205,7 +219,6 @@ export default {
         deleteData()
         file = event
       } else {
-        console.log('drop')
         file = event.dataTransfer.files[0]
       }
       emit('activeUpload', true, file.type)
@@ -266,15 +279,15 @@ export default {
     }
 
     window.onbeforeunload = (e) => {
-      if(store.state.elementRef) {
+      if (store.state.elementRef) {
         upload.cancel()
-        store.dispatch('removeDataFromDatabase',store.state.elementRef)
+        store.dispatch('removeDataFromDatabase', store.state.elementRef)
       }
     }
 
     const cancelSendData = () => {
       upload.cancel()
-      store.commit('setElementRef',null)
+      store.commit('setElementRef', null)
       state.sendDataInfo = {}
       state.loadingStatus = false
       emit('activeUpload', false, state.sendDataInfo.type)
