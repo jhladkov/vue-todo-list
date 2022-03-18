@@ -23,6 +23,7 @@
             v-for="item in todo"
             @selectedOption="rewritePriority"
             :typeData="item.storageInfo.type"
+            :name="item.storageInfo.name"
             :id="item.id"
             :value="item.value"
             :key="item.id"
@@ -36,6 +37,7 @@
             @done="doneTask"
             v-for="item in done"
             :id="item.id"
+            :name="item.storageInfo.name"
             :typeData="item.storageInfo.type"
             :value="item.value"
             :key="item.id"
@@ -112,7 +114,8 @@ export default {
       emit('rewritePriority',value,id)
     }
 
-    const remove = (id, deleteData) => {
+    const remove = (id, deleteData,downloadUrl) => {
+      URL.revokeObjectURL(downloadUrl)
       emit('remove',id,deleteData)
     }
 

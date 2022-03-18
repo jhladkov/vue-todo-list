@@ -1,4 +1,4 @@
-export const useObjectTodo = (section = '', priority = 1, type = 'todo', inputValue, imgUrl = '', typeData = '', id = 0) => {
+export const useObjectTodo = (section = '', priority = 1, type = 'todo', inputValue, imgUrl = '', typeData = '',name = '', id = 0) => {
 
     return {
         section,
@@ -6,6 +6,7 @@ export const useObjectTodo = (section = '', priority = 1, type = 'todo', inputVa
         type,
         value: inputValue,
         storageInfo: {
+            name,
             type: typeData,
             url: imgUrl
         },

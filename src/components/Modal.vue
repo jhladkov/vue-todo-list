@@ -13,7 +13,7 @@
         </div>
       </div>
       <DragAndDrop
-          @getUrlImg="getImg"
+          @getUrl="getUrl"
           @activeUpload="activeUpload"
           @removeElementRef="setElementRef"
       />
@@ -100,8 +100,9 @@ export default {
       }
     }
 
-    const getImg = (payload) => {
-      state.storageData.url = payload
+    const getUrl = (url,name) => {
+      state.storageData.url = url
+      state.storageData.name = name
     }
 
     const setSection = (value) => {
@@ -126,6 +127,7 @@ export default {
           state.inputText,
           state.storageData.url,
           state.storageData.type,
+          state.storageData.name,
           Math.floor(Math.random() * 1000000)
       )
 
@@ -155,7 +157,7 @@ export default {
       state,
       v$,
       createTodo,
-      getImg,
+      getUrl,
       activeUpload,
       setElementRef,
       setSection

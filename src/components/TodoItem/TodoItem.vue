@@ -7,7 +7,7 @@
           v-if="typeData"
           class="panel-todo__inner"
       >
-        <a :href="url" download>
+        <a :href="state.downloadUrl" :download="name">
           <Svg
               view-box="0 0 32 32"
               path="M27.844 11.252c-0.101-4.022-3.389-7.252-7.433-7.252-2.369 0-4.477 1.109-5.839 2.835-0.764-0.987-1.959-1.624-3.303-1.624-2.307 0-4.176 1.871-4.176 4.179 0 0.201 0.015 0.399 0.043 0.592-0.351-0.063-0.711-0.098-1.080-0.098-3.344-0-6.054 2.712-6.054 6.058s2.71 6.058 6.054 6.058h2.868l7.078 7.328 7.078-7.328 3.484-0c3.004-0.006 5.438-2.444 5.438-5.451 0-2.565-1.771-4.716-4.156-5.296zM16 26l-6-6h4v-6h4v6h4l-6 6z"
@@ -79,7 +79,7 @@
 
     <div class="item__inner">
       <Button
-          @click="$emit('done',id,url)"
+          @click="$emit('done',id,url,state.downloadUrl)"
           item-class="item__done button"
           text="Выполнено"
           button-type="button"
@@ -98,7 +98,7 @@
 
 import Button from "../../UI/Button";
 import Select from "../../UI/Select";
-import {computed, reactive} from "vue";
+import {computed, onMounted, reactive} from "vue";
 import Svg from "../../UI/Svg";
 
 export default {
@@ -113,10 +113,12 @@ export default {
     url: {
       type: String,
       default: ''
-    }
+    },
+    name: String
   },
   setup(props, {emit}) {
     const state = reactive({
+      downloadUrl: '',
       options: [
         {id: Math.floor(Math.random() * 1000000), value: 4},
         {id: Math.floor(Math.random() * 1000000), value: 3},
@@ -150,6 +152,15 @@ export default {
     const rewritePriority = (value) => {
       emit('selectedOption', value, props.id)
     }
+
+    onMounted(() => {
+      if (props.url && props.typeData) {
+        const blobForDownload = new Blob([props.url], {type: props.typeData})
+        const url = URL.createObjectURL(blobForDownload)
+        console.log(url,props.typeData)
+        state.downloadUrl = url
+      }
+    })
 
     return {
       state,

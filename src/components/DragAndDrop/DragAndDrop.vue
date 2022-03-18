@@ -178,7 +178,7 @@ export default {
             state.activeUpload = false
             state.uploadStatus = true
             emit('activeUpload', state.activeUpload, value.type)
-            emit('getUrlImg', url)
+            emit('getUrl', url,value.name)
           })
         })
       } else {
