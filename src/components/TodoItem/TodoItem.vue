@@ -155,10 +155,15 @@ export default {
 
     onMounted(() => {
       if (props.url && props.typeData) {
-        const blobForDownload = new Blob([props.url], {type: props.typeData})
-        const url = URL.createObjectURL(blobForDownload)
-        console.log(url,props.typeData)
-        state.downloadUrl = url
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'blob';
+        xhr.onload = (event) => {
+          const blob = xhr.response;
+          const url = URL.createObjectURL(blob)
+          state.downloadUrl = url
+        };
+        xhr.open('GET', props.url);
+        xhr.send();
       }
     })
 
