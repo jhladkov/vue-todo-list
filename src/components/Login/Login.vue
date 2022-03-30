@@ -1,13 +1,16 @@
 <template>
-  <Section section-class="section login">
-    <Title title-class="login__title title" title="Авторизация"/>
+  <Section section-class="login">
+    <Title
+        title-class="login__title title"
+        title="Авторизация"
+    />
     <div class="login__inner">
-      <LoginWith v-for="item in state.loginsArr"
-                 :title="item.title"
-                 :path="item.path"
-                 :class-svg="item.classSvg"
-                 :view-box="item.viewBox"
-
+      <LoginWith
+          v-for="item in state.loginsArr"
+          :title="item.title"
+          :path="item.path"
+          :class-svg="item.classSvg"
+          :view-box="item.viewBox"
       />
 
     </div>

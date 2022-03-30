@@ -3,7 +3,7 @@
   border-radius: 20px;
   animation: 1s appearance;
   text-align: center;
-  background: white;
+  background: #272630;
   max-width: 600px;
   width: 100%;
   height: 100%;
@@ -32,6 +32,10 @@
     display: flex;
     flex-wrap: wrap;
 
+    button{
+      box-shadow: 2px 2px 4px 1px #73d7aa;
+    }
+
     .form__inner{
       display: flex;
       align-items: center;
@@ -44,6 +48,8 @@
 
     .form__input {
       margin-right: 20px;
+      background: none;
+      color: white;
     }
   }
 
@@ -97,10 +103,6 @@
         }
         .drag-area-info__svg{
           max-width: 70px;
-          transition: all .3s;
-          &:hover{
-            fill: #73d7aa;
-          }
         }
       }
     }
@@ -144,6 +146,7 @@
 }
 
 .img-wrapper__inner {
+  margin-bottom: 5px;
   padding-top: 20px;
   display: flex;
   align-items: center;
@@ -161,9 +164,7 @@
     font-size: 18px;
     border-radius: 50px;
     padding:15px;
-    background: white;
     &:hover {
-
       border-color: #73d7aa;
       background: #73d7aa;
       color: white;

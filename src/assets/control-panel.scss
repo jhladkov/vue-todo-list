@@ -11,6 +11,12 @@
     display: flex;
     .control-panel__inner{
       margin-right: 20px;
+      .control-panel__add-task{
+        box-shadow: 2px 2px 4px 1px #73d7aa;
+        &:hover{
+          box-shadow: none;
+        }
+      }
       &:last-child{
         margin-right: 0;
       }
@@ -20,7 +26,7 @@
 
 .top {
   #options{
-    bottom: 46px;
+    bottom: 50px;
   }
 }
 

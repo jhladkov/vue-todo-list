@@ -7,6 +7,8 @@ body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   height: 100vh;
+  background: #272630;
+  color: white;
 }
 
 
@@ -14,19 +16,19 @@ html {
   min-height: 100%;
 }
 
-//::-webkit-scrollbar{
-//  width: 5px;
-//}
-//::-webkit-scrollbar-track {
-//  background: $white;
-//}
-//::-webkit-scrollbar-thumb{
-//  background: $lightGray;
-//  border-radius: 8px;
-//}
-//::-webkit-scrollbar-thumb:hover{
-//  background: $darkGray;
-//}
+::-webkit-scrollbar{
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #1b1a22;
+}
+::-webkit-scrollbar-thumb{
+  background: darkgray;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover{
+  background: darkgray;
+}
 
 #app {
   height: 100%;
@@ -48,6 +50,11 @@ svg{
   max-width: 20px;
   width: 100%;
   cursor: pointer;
+  fill: white;
+  transition: all .3s;
+  &:hover{
+    fill: #73d7aa;
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -90,16 +97,18 @@ label {
 
 .button {
   font-size: 18px;
-  background: white;
+  background: none;
   padding: 15px;
   min-width: 140px;
   cursor: pointer;
   border-radius: 50px;
   transition: all .3s;
   outline: none;
-  border: 1px solid darkgray;
+  border: 1px solid #73d7aa;
+  color: white;
 
   &:hover {
+    box-shadow: none !important;
     background: #73d7aa;
     color: white;
     border-color: #73d7aa;
@@ -146,12 +155,14 @@ label {
 }
 
 .exit, .remove {
-  border-color: darkgray;
+  border-color: red;
   transition: all .3s;
+  box-shadow: 2px 2px 4px 1px #D70000;
 
   &:hover {
     border-color: red;
     background: red;
+    box-shadow: none;
   }
 }
 

@@ -4,7 +4,7 @@
   left: 50%;
   transform: translate(-50%,-50%);
   animation: 1s appearance;
-  background: white;
+  background: #272630;
   padding: 20px;
   width: 100%;
   max-width: 500px;
@@ -25,6 +25,8 @@
       flex-direction: column;
       input{
         margin-bottom: 20px;
+        background: none;
+        color: white;
       }
     }
   }

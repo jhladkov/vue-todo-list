@@ -107,7 +107,6 @@ import Button from "../../UI/Button";
 import Select from "../../UI/Select";
 import {computed, onMounted, reactive} from "vue";
 import Svg from "../../UI/Svg";
-import {saveAs} from 'file-saver';
 
 export default {
   components: {Svg, Select, Button},
@@ -165,9 +164,6 @@ export default {
       emit('selectedOption', value, props.id)
     }
 
-    const downloadFile = (url, fileName) => {
-      saveAs(url, fileName)
-    }
 
     onMounted(() => {
       if (props.url && props.typeData) {
@@ -190,7 +186,6 @@ export default {
       validDataVideo,
       validDataAudio,
       validDataElse,
-      downloadFile
     }
   }
 }

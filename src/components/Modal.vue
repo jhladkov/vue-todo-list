@@ -37,6 +37,7 @@
               className="form__select"
               typeOpen="top"
               :options="state.options"
+              :possibility-to-delete="false"
           />
         </div>
         <Button
